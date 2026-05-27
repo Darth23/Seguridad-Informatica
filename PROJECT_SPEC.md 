@@ -1,0 +1,78 @@
+# 🏗️ CYBEREDU - ZERO-TRUST ACADEMY | BLUEPRINT TÉCNICO
+
+## 🎯 RESTRICCIÓN CRÍTICA
+- 100% client-side. NUNCA se debe salir del navegador.
+- Zero-backend. Todo corre en WASM, IndexedDB, localStorage y Service Workers.
+- Layout de 3 paneles redimensionables. No navegar a otras rutas para herramientas.
+
+## 🏗️ ARQUITECTURA
+- Monorepo: pnpm workspaces + Turborepo
+- Frontend: Next.js 14+ (App Router), TypeScript 5.4, React 18
+- Estado: Zustand (UI/Terminal) + TanStack Query (datos estáticos)
+- Estilo: Tailwind CSS + High-Contrast Dark Mode (#0d1117 base)
+- Terminal: Xterm.js + xterm-addon-fit
+- Motor Lógico: Rust → WASM (wasm-bindgen)
+- Persistencia: localStorage + IndexedDB (via `idb`)
+- PWA: `@ducanh2912/next-pwa` + Workbox (offline-first)
+
+## 📁 ESTRUCTURA DE CARPETAS
+cyber-edu-platform/
+├── apps/web/                 # Next.js App
+│   ├── app/                  # Layouts, pages, middleware.ts
+│   ├── components/           # UI modular (Sidebar, MarkdownReader, XtermA11yWrapper, BossHUD, etc.)
+│   ├── lib/                  # Stores, hooks, i18n, certificates, analyticsDB
+│   └── public/               # sw.js, manifest.json, offline.html, roadmap.json
+├── packages/
+│   ├── core-wasm/            # Rust project (Cargo.toml, src/lib.rs + módulos)
+│   └── types/                # index.ts (LessonNode, ChallengeMeta, UserState, etc.)
+├── content/                  # MDX lessons (14 lecciones + 1 boss fight)
+├── scripts/                  # build-roadmap.ts, obfuscate-flags.ts, validate-roadmap.ts
+├── .github/workflows/ci.yml  # 6 jobs CI/CD
+└── turbo.json, pnpm-workspace.yaml, Dockerfile
+
+## ⚙️ MÓDULOS WASM (Rust)
+- `network.rs`: Simulador nmap (VirtualNetwork)
+- `crypto.rs`: AES-256-GCM, SHA-256, RSA-2048 (keygen, encrypt, decrypt, sign, verify)
+- `log_analyzer.rs`: grep, count, extract_ips con regex seguro
+- `filesystem.rs`: VFS con logs Apache/auth simulados
+- `flag_validator.rs`: Anti-cheat (XOR + PBKDF2, honey flags, validación por hash SHA-256)
+- `boss_simulator.rs`: Máquina de estados (health, phases, defenses, vulnerabilities encadenadas)
+- `rate_limiter.rs`: Anti-ReDoS (timeout 1s, detección heurística)
+
+## 🖥️ LAYOUT (3 PANELES)
+1. Izquierdo: Sidebar JSON-driven, progreso global, búsqueda difusa, persistencia de nodos expandidos.
+2. Central: `react-markdown` + `rehype-highlight`. Soporta: CodeBlock (copiar), Flashcard, Callout (🚨💡🛠️).
+3. Derecho/Inferior: Xterm.js + `XtermA11yWrapper` (shadow buffer aria-live, input accesible, focus trap).
+- Redimensionable con `react-resizable-panels`.
+- Error Boundary en terminal para aislar crashes.
+
+## 🛡️ SEGURIDAD & ANTI-CHEAT
+- Flags ofuscadas en `roadmap.json` (XOR + PBKDF2). Nunca en plaintext.
+- Validación por hash SHA-256 (compara input vs hash, no expone flag).
+- Honey flags: detectan lectura de DevTools y registran intentos.
+- CSP estricta con nonces dinámicos (`middleware.ts`).
+- Rate limiter WASM anti-ReDoS.
+
+## ♿ ACCESIBILIDAD (WCAG 2.1 AA)
+- Terminal accesible via `aria-live="polite"` + input teclado nativo.
+- Atajos: Ctrl+K (palette), Ctrl+1/2/3 (paneles), Ctrl+Shift+H (alto contraste), Ctrl+L (limpiar).
+- `prefers-reduced-motion` y `prefers-contrast` respetados.
+- Focus ring 3px amarillo solo en navegación por teclado.
+- Onboarding con Shepherd.js (5 pasos).
+
+## 🎮 GAMIFICACIÓN & CERTIFICADOS
+- CTF Flags + pistas graduales (penalización de puntos).
+- 10 Achievements con toast animado + SR announcements.
+- Leaderboard P2P: Yjs + WebRTC (sin servidor).
+- Certificados PDF client-side (`jsPDF` + QR + firma SHA-256 + verificación pública).
+- Backup/Restore JSON con checksum.
+
+## 📊 ANALYTICS LOCAL
+- IndexedDB wrapper (`idb`) para eventos, métricas por lección, actividad diaria.
+- WASM `analytics_engine.rs` para cálculo de skill breakdown y streaks.
+- Dashboard: Heatmap, SkillRadar, TimeDistribution, Export JSON.
+
+## 🌐 DEPLOY & CI/CD
+- CI: GitHub Actions (lint, typecheck, wasm-build <500KB, tests ≥80%, a11y, build)
+- Deploy: Vercel (recomendado), Cloudflare Pages, Docker
+- PWA: Precache WASM/MDX, fallback offline, install prompt.
