@@ -1,57 +1,78 @@
 ```
 # Dependencies
 node_modules/
-.pnpm-store/
 
 # Build outputs
 dist/
 build/
-.next/
-.nuxt/
-out/
-
-# Rust/Cargo
 target/
-Cargo.lock
 
-# TypeScript/JavaScript
-*.tsbuildinfo
-*.js.map
-*.ts.map
-
-# Python (if any Python files exist in the project)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-.ENV
-.python-version
-
-# Logs
-*.log
+# Cache directories
+.cache/
+.node_cache/
+.npm/
+.yarn/
 
 # Environment variables
 .env
 .env.local
 .env.*
-!.env.example
 
-# IDE
+# IDE specific
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
+# Logs
+*.log
+
+# Temporary files
+*.tmp
 .DS_Store
 Thumbs.db
 
-# Coverage
-coverage/
-htmlcov/
+# Python specific (if applicable)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
 .coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# TypeScript/JavaScript specific
+*.tsbuildinfo
+.next/
+nuxt/dist/
+*.njk
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.svg
+*.ico
+
+# General build artifacts
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.exe
+*.out
 ```
