@@ -1,38 +1,37 @@
 ```
 # Dependencies
 node_modules/
-
-# Build outputs
-dist/
-build/
 target/
 
-# Cache directories
-.cache/
-.node_cache/
-.npm/
-.yarn/
+# Build artifacts
+dist/
+build/
 
-# Environment variables
+# Rust-specific
+Cargo.lock
+*.so
+*.dylib
+*.dll
+
+# Environment
 .env
 .env.local
-.env.*
+*.env.*
 
-# IDE specific
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Logs
+# Logs and temp files
 *.log
-
-# Temporary files
 *.tmp
+*.swp
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Python specific (if applicable)
+# Python (if present)
 __pycache__/
 *.pyc
 *.pyo
@@ -40,39 +39,4 @@ __pycache__/
 .Python
 venv/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/
-.mypy_cache/
-.pytest_cache/
-.hypothesis/
-
-# TypeScript/JavaScript specific
-*.tsbuildinfo
-.next/
-nuxt/dist/
-*.njk
-*.woff
-*.woff2
-*.ttf
-*.eot
-*.svg
-*.ico
-
-# General build artifacts
-*.o
-*.obj
-*.so
-*.a
-*.dll
-*.exe
-*.out
 ```
