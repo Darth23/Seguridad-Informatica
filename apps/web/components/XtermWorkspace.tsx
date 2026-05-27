@@ -6,6 +6,8 @@ import { FitAddon } from 'xterm-addon-fit';
 import 'xterm/css/xterm.css';
 import { useUIStore, useTerminalStore } from '@/lib/stores/uiStore';
 import { XtermA11yWrapper } from './XtermA11yWrapper';
+import { processCommand } from '@/lib/wasm';
+import type { CommandResponse } from '@/lib/wasm/types';
 
 interface XtermWorkspaceProps {
   onCommandExecute?: (command: string) => Promise<string>;
@@ -78,6 +80,8 @@ export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: Xterm
     term.writeln('');
     term.writeln('Escribe \x1b[1;32mhelp\x1b[0m para ver los comandos disponibles.');
     term.writeln('');
+    term.writeln('\x1b[1;35m[WA SM]\x1b[0m Core engine loaded and ready.');
+    term.writeln('');
 
     // Execute initial commands
     initialCommands.forEach((cmd) => {
@@ -134,21 +138,14 @@ export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: Xterm
         // Add to history
         addCommand(command);
         
-        // Execute command
-        if (onCommandExecute) {
-          onCommandExecute(command).then((output) => {
-            term.writeln(output);
-            addTerminalLine(`${command}: ${output}`);
-          }).catch((err) => {
-            term.writeln(`\x1b[31mError: ${err.message}\x1b[0m`);
-            addTerminalLine(`${command}: ERROR - ${err.message}`);
-          });
-        } else {
-          // Default command handler
-          const output = handleDefaultCommand(command);
+        // Execute command via WASM
+        executeWasmCommand(command).then((output) => {
           term.writeln(output);
           addTerminalLine(`${command}: ${output}`);
-        }
+        }).catch((err) => {
+          term.writeln(`\x1b[31mError: ${err.message}\x1b[0m`);
+          addTerminalLine(`${command}: ERROR - ${err.message}`);
+        });
         
         setCurrentInput('');
       } else {
@@ -176,9 +173,41 @@ export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: Xterm
       term.writeln('^C');
       setCurrentInput('');
     }
-  }, [currentInput, onCommandExecute, addCommand, navigateHistory, addTerminalLine, clearTerminal]);
+  }, [currentInput, addCommand, navigateHistory, addTerminalLine, clearTerminal]);
 
-  // Default command handler
+  /**
+   * Execute a command through the WASM bridge
+   * This routes commands to the appropriate WASM module
+   */
+  const executeWasmCommand = async (command: string): Promise<string> => {
+    const parts = command.split(/\s+/);
+    const cmd = parts[0].toLowerCase();
+    const args = parts.slice(1).join(' ');
+
+    // First, try to route through WASM
+    try {
+      const response: CommandResponse = await processCommand(cmd, args);
+      
+      if (response.success) {
+        return response.output;
+      } else if (response.error) {
+        // Check if it's an unknown command error from WASM
+        if (response.error.includes('Unknown command')) {
+          // Fall back to default handler for basic commands
+          return handleDefaultCommand(command);
+        }
+        return `\x1b[31m${response.error}\x1b[0m`;
+      }
+    } catch (error) {
+      console.error('[WASM] Command execution error:', error);
+      // Fall back to default handler on WASM error
+      return handleDefaultCommand(command);
+    }
+
+    return handleDefaultCommand(command);
+  };
+
+  // Default command handler for basic shell commands not handled by WASM
   const handleDefaultCommand = (command: string): string => {
     const cmd = command.split(' ')[0].toLowerCase();
     const args = command.split(' ').slice(1);
@@ -189,21 +218,20 @@ export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: Xterm
 \x1b[1mComandos disponibles:\x1b[0m
   \x1b[32mhelp\x1b[0m              Muestra esta ayuda
   \x1b[32mclear\x1b[0m             Limpia la terminal
-  \x1b[32mls\x1b[0m                Lista archivos
+  \x1b[32mls\x1b[0m                Lista archivos (WASM)
   \x1b[32mpwd\x1b[0m                Muestra directorio actual
   \x1b[32mwhoami\x1b[0m             Muestra usuario actual
   \x1b[32mdate\x1b[0m               Muestra fecha y hora
   \x1b[32mecho\x1b[0m [texto]       Imprime texto
-  \x1b[32mcat\x1b[0m [archivo]      Muestra contenido de archivo
-  \x1b[32mnmap\x1b[0m [host]        Escaneo de red simulado
-  \x1b[32mflag\x1b[0m [valor]       Envía una flag CTF
+  \x1b[32mcat\x1b[0m [archivo]      Muestra contenido de archivo (WASM)
+  \x1b[32mnmap\x1b[0m [host]        Escaneo de red simulado (WASM)
+  \x1b[32mflag\x1b[0m [valor]       Envía una flag CTF (WASM)
+  \x1b[32mhash\x1b[0m [data]        Hash de datos (WASM)
+  \x1b[32manalyze_log\x1b[0m [log]  Analiza logs (WASM)
 `;
 
       case 'clear':
         return '';
-
-      case 'ls':
-        return `\x1b[1;34mdocumentos/\x1b[0m  \x1b[1;34mdescargas/\x1b[0m  \x1b[32mnotas.txt\x1b[0m  \x1b[35mconfig.json\x1b[0m  \x1b[31msecret.flag\x1b[0m`;
 
       case 'pwd':
         return '/home/user';
@@ -216,36 +244,6 @@ export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: Xterm
 
       case 'echo':
         return args.join(' ');
-
-      case 'cat':
-        if (args[0] === 'notas.txt') {
-          return 'Notas de estudio para el curso de ciberseguridad.';
-        } else if (args[0] === 'config.json') {
-          return '{\n  "theme": "dark",\n  "language": "es"\n}';
-        } else if (args[0] === 'secret.flag') {
-          return '\x1b[31m⚠️ Acceso denegado. Necesitas permisos de root.\x1b[0m';
-        }
-        return `\x1b[31mcat: ${args[0] || ''}: No such file or directory\x1b[0m`;
-
-      case 'nmap':
-        return `
-\x1b[1mStarting Nmap simulation...\x1b[0m
-Nmap scan report for ${args[0] || 'localhost'}
-Host is up (0.0012s latency).
-Not shown: 997 closed ports
-PORT   STATE SERVICE
-22/tcp open  ssh
-80/tcp open  http
-443/tcp open https
-
-\x1b[32mNmap done: 1 IP address (1 host up) scanned in 0.15 seconds\x1b[0m
-`;
-
-      case 'flag':
-        if (args[0]) {
-          return `\x1b[33mEnviando flag para validación: ${args[0]}\x1b[0m\n\x1b[31m[SIMULACIÓN] Flag no válida. Intenta nuevamente.\x1b[0m`;
-        }
-        return '\x1b[31mUso: flag <valor>\x1b[0m';
 
       default:
         return `\x1b[31m${cmd}: command not found\x1b[0m`;
