@@ -1,0 +1,25 @@
+{
+  "name": "@cyber-edu/core-wasm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./pkg/core_wasm.js",
+  "types": "./pkg/core_wasm.d.ts",
+  "exports": {
+    ".": {
+      "import": "./pkg/core_wasm.js",
+      "types": "./pkg/core_wasm.d.ts"
+    }
+  },
+  "scripts": {
+    "wasm:build": "wasm-pack build --target web --release",
+    "wasm:build:dev": "wasm-pack build --target web --dev",
+    "clean": "rm -rf pkg node_modules"
+  },
+  "files": [
+    "pkg"
+  ],
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
