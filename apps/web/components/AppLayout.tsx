@@ -14,7 +14,7 @@ export default function AppLayout() {
       <PanelGroup direction="horizontal">
         
         {/* PANEL IZQUIERDO: Sidebar */}
-        <Panel defaultSize={20} minSize={15} maxSize={30}>
+        <Panel defaultSize={20} minSize={15} maxSize={30} data-tour="sidebar">
           <Sidebar roadmapData={roadmapData} />
         </Panel>
 
@@ -25,14 +25,14 @@ export default function AppLayout() {
           <PanelGroup direction="vertical">
             
             {/* CONTENIDO CENTRAL */}
-            <Panel defaultSize={60} minSize={20}>
+            <Panel defaultSize={60} minSize={20} data-tour="content">
               <MarkdownReader content="" />
             </Panel>
 
             <PanelResizeHandle className="h-2 bg-[#161b22] hover:bg-[#10b981] transition-colors cursor-row-resize" />
 
             {/* TERMINAL INFERIOR */}
-            <Panel defaultSize={40} minSize={20}>
+            <Panel defaultSize={40} minSize={20} data-tour="terminal">
               <XtermWorkspace />
             </Panel>
 

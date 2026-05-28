@@ -7,7 +7,7 @@ function generateNonce(): string {
   return btoa(String.fromCharCode(...array));
 }
 
-export function middleware(request: NextRequest) {
+export function middleware(_request: NextRequest) {
   const nonce = generateNonce();
   const response = NextResponse.next();
 

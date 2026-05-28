@@ -1,0 +1,212 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-05-27T00:00:00Z",
+  "nodes": [
+    {
+      "id": "onboarding",
+      "title": "Bienvenido a CyberEdu",
+      "description": "Introducción a la plataforma y configuración inicial",
+      "type": "lesson",
+      "status": "available",
+      "contentPath": "content/00-onboarding/welcome.mdx",
+      "metadata": {
+        "estimatedTime": 10,
+        "difficulty": "beginner",
+        "prerequisites": []
+      }
+    },
+    {
+      "id": "network-scanning",
+      "title": "Escaneo de Redes",
+      "description": "Aprende a usar nmap y conceptos de redes",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/01-network/scanning.mdx",
+      "metadata": {
+        "estimatedTime": 30,
+        "difficulty": "beginner",
+        "prerequisites": ["onboarding"]
+      }
+    },
+    {
+      "id": "network-services",
+      "title": "Servicios y Puertos",
+      "description": "Identificación de servicios activos y puertos abiertos",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/01-network/services.mdx",
+      "metadata": {
+        "estimatedTime": 25,
+        "difficulty": "beginner",
+        "prerequisites": ["network-scanning"]
+      }
+    },
+    {
+      "id": "linux-basics",
+      "title": "Comandos Linux Básicos",
+      "description": "Navegación del sistema de archivos y comandos esenciales",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/02-linux/basics.mdx",
+      "metadata": {
+        "estimatedTime": 20,
+        "difficulty": "beginner",
+        "prerequisites": ["onboarding"]
+      }
+    },
+    {
+      "id": "linux-permissions",
+      "title": "Permisos y Usuarios",
+      "description": "Gestión de permisos, usuarios y grupos en Linux",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/02-linux/permissions.mdx",
+      "metadata": {
+        "estimatedTime": 25,
+        "difficulty": "intermediate",
+        "prerequisites": ["linux-basics"]
+      }
+    },
+    {
+      "id": "crypto-symmetric",
+      "title": "Criptografía Simétrica",
+      "description": "AES-256-GCM y cifrado de datos",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/03-crypto/symmetric.mdx",
+      "metadata": {
+        "estimatedTime": 30,
+        "difficulty": "intermediate",
+        "prerequisites": ["linux-basics"]
+      }
+    },
+    {
+      "id": "crypto-hashing",
+      "title": "Hashing y SHA-256",
+      "description": "Funciones hash y verificación de integridad",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/03-crypto/hashing.mdx",
+      "metadata": {
+        "estimatedTime": 25,
+        "difficulty": "intermediate",
+        "prerequisites": ["crypto-symmetric"]
+      }
+    },
+    {
+      "id": "crypto-asymmetric",
+      "title": "Criptografía Asimétrica",
+      "description": "RSA-2048, firmas digitales y certificados",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/03-crypto/asymmetric.mdx",
+      "metadata": {
+        "estimatedTime": 35,
+        "difficulty": "advanced",
+        "prerequisites": ["crypto-hashing"]
+      }
+    },
+    {
+      "id": "log-analysis",
+      "title": "Análisis de Logs",
+      "description": "Parsing, búsqueda y patrones en logs del sistema",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/04-logs/analysis.mdx",
+      "metadata": {
+        "estimatedTime": 25,
+        "difficulty": "intermediate",
+        "prerequisites": ["linux-basics"]
+      }
+    },
+    {
+      "id": "log-siem",
+      "title": "SIEM Básico",
+      "description": "Correlación de eventos y detección de incidentes",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/04-logs/siem.mdx",
+      "metadata": {
+        "estimatedTime": 30,
+        "difficulty": "advanced",
+        "prerequisites": ["log-analysis"]
+      }
+    },
+    {
+      "id": "forensics-memory",
+      "title": "Forensics de Memoria",
+      "description": "Análisis de volcados de memoria y procesos",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/05-forensics/memory.mdx",
+      "metadata": {
+        "estimatedTime": 35,
+        "difficulty": "advanced",
+        "prerequisites": ["linux-permissions"]
+      }
+    },
+    {
+      "id": "forensics-network",
+      "title": "Forensics de Red",
+      "description": "Análisis de tráfico PCAP y captura de paquetes",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/05-forensics/network.mdx",
+      "metadata": {
+        "estimatedTime": 30,
+        "difficulty": "advanced",
+        "prerequisites": ["network-services"]
+      }
+    },
+    {
+      "id": "web-xss",
+      "title": "Cross-Site Scripting (XSS)",
+      "description": "Tipos de XSS, prevención y mitigación",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/06-web/xss.mdx",
+      "metadata": {
+        "estimatedTime": 25,
+        "difficulty": "intermediate",
+        "prerequisites": ["linux-basics"]
+      }
+    },
+    {
+      "id": "web-sqli",
+      "title": "SQL Injection",
+      "description": "Inyección SQL, blind SQLi y prevención",
+      "type": "lesson",
+      "status": "locked",
+      "contentPath": "content/06-web/sqli.mdx",
+      "metadata": {
+        "estimatedTime": 30,
+        "difficulty": "intermediate",
+        "prerequisites": ["web-xss"]
+      }
+    },
+    {
+      "id": "boss-cyberguard",
+      "title": "Boss Fight: CyberGuard v9.2",
+      "description": "Enfrenta al boss final usando todo lo aprendido",
+      "type": "boss",
+      "status": "locked",
+      "contentPath": "content/07-boss/cyberguard.mdx",
+      "metadata": {
+        "estimatedTime": 60,
+        "difficulty": "advanced",
+        "prerequisites": ["log-siem", "crypto-asymmetric", "web-sqli"]
+      },
+      "bossConfig": {
+        "id": "cyberguard-v9",
+        "name": "CyberGuard v9.2",
+        "totalHealth": 1000,
+        "phases": 3,
+        "rewards": {
+          "points": 500,
+          "achievement": "boss-slayer",
+          "certificate": true
+        }
+      }
+    }
+  ]
+}

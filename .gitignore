@@ -45,6 +45,7 @@ htmlcov/
 *.gz
 *.tar
 *.tgz
+*.gz.old
 *.bz2
 *.xz
 *.7z

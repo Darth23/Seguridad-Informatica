@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="667" viewBox="0 0 375 667">
+  <rect width="375" height="667" fill="#0d1117"/>
+  <rect x="0" y="0" width="375" height="50" fill="#161b22"/>
+  <text x="187" y="32" fill="#58a6ff" font-family="monospace" font-size="16" text-anchor="middle">CyberEdu</text>
+  <rect x="10" y="60" width="355" height="300" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="187" y="210" fill="#58a6ff" font-family="monospace" font-size="14" text-anchor="middle">Terminal Virtual</text>
+  <text x="187" y="230" fill="#7ee787" font-family="monospace" font-size="12" text-anchor="middle">$ nmap localhost</text>
+  <rect x="10" y="380" width="355" height="80" rx="8" fill="#161b22" stroke="#30363d"/>
+  <text x="187" y="425" fill="#e6edf3" font-family="sans-serif" font-size="14" text-anchor="middle">Lecciones: 5/14</text>
+</svg>

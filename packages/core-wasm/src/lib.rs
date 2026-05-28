@@ -8,6 +8,8 @@ pub mod log_analyzer;
 pub mod filesystem;
 pub mod flag_validator;
 pub mod rate_limiter;
+pub mod boss_simulator;
+pub mod analytics_engine;
 
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
@@ -90,6 +92,19 @@ fn execute_command(command: &str, args: &str) -> CommandResponse {
         // Rate limiter commands
         "rate_check" => rate_limiter::check_rate_impl(args),
         "rate_reset" => rate_limiter::reset_rate_impl(args),
+        
+        // Boss simulator commands
+        "boss_state" => boss_simulator::boss_get_state_impl(),
+        "boss_start" => boss_simulator::boss_start_impl(),
+        "boss_damage" => boss_simulator::boss_deal_damage_impl(args),
+        "boss_vuln" => boss_simulator::boss_expose_vulnerability_impl(args),
+        "boss_defend" => boss_simulator::boss_add_defense_impl(args),
+        "boss_reset" => boss_simulator::boss_reset_impl(),
+        
+        // Analytics engine commands
+        "analytics_skills" => analytics_engine::analytics_skill_breakdown_impl(args),
+        "analytics_streaks" => analytics_engine::analytics_calculate_streaks_impl(args),
+        "analytics_time" => analytics_engine::analytics_time_metrics_impl(args),
         
         _ => CommandResponse::error(format!("Unknown command: {}", command)),
     }

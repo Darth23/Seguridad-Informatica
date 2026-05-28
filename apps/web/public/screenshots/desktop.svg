@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#0d1117"/>
+  <rect x="0" y="0" width="300" height="1080" fill="#161b22"/>
+  <rect x="300" y="0" width="2" height="1080" fill="#30363d"/>
+  <text x="150" y="60" fill="#58a6ff" font-family="monospace" font-size="24" text-anchor="middle">CyberEdu</text>
+  <text x="1100" y="80" fill="#e6edf3" font-family="sans-serif" font-size="32" text-anchor="middle">Dashboard de Lecciones</text>
+  <rect x="350" y="120" width="400" height="200" rx="8" fill="#161b22" stroke="#30363d"/>
+  <text x="550" y="220" fill="#7ee787" font-family="monospace" font-size="16" text-anchor="middle">Redes - Escaneo</text>
+  <rect x="800" y="120" width="400" height="200" rx="8" fill="#161b22" stroke="#30363d"/>
+  <text x="1000" y="220" fill="#d29922" font-family="monospace" font-size="16" text-anchor="middle">Criptografía</text>
+  <rect x="1250" y="120" width="400" height="200" rx="8" fill="#161b22" stroke="#30363d"/>
+  <text x="1450" y="220" fill="#ff7b72" font-family="monospace" font-size="16" text-anchor="middle">Forensics</text>
+  <rect x="350" y="380" width="1300" height="400" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="1000" y="580" fill="#58a6ff" font-family="monospace" font-size="20" text-anchor="middle">Terminal Interactiva</text>
+</svg>

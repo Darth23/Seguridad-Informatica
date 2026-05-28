@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"components/AppLayout.tsx -> ./XtermWorkspace\":{\"id\":\"components/AppLayout.tsx -> ./XtermWorkspace\",\"files\":[\"static/css/_app-pages-browser_components_XtermWorkspace_tsx.css\",\"static/chunks/_app-pages-browser_components_XtermWorkspace_tsx.js\"]},\"lib/wasm/index.ts -> @cyber-edu/core-wasm\":{\"id\":\"lib/wasm/index.ts -> @cyber-edu/core-wasm\",\"files\":[\"static/chunks/_app-pages-browser_packages_core-wasm_pkg_core_wasm_js.js\"]}}"
