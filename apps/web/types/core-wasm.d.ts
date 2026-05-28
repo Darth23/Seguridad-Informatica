@@ -7,6 +7,7 @@ declare module '@cyber-edu/core-wasm' {
   export function get_challenge_status(): string;
   export function scan_host(args: string): string;
   export function scan_network(args: string): string;
+  export function netcat(args: string): string;
   export function ping_host(args: string): string;
   export function http_get(args: string): string;
   export function hash_data(args: string): string;

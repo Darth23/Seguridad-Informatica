@@ -61,6 +61,13 @@ impl VirtualNetwork {
         ]);
     }
 
+    /// Add a service-profile target for Module 0.4
+    pub fn add_service_target(&mut self, ip: String, port: u32, service: &str) {
+        self.hosts.insert(ip, vec![
+            PortInfo { port: port as u16, service: service.to_string(), state: "open".to_string() },
+        ]);
+    }
+
     fn get_host_ports(&self, host: &str) -> Vec<&PortInfo> {
         self.hosts.get(host).map(|v| v.iter().collect()).unwrap_or_default()
     }
@@ -77,11 +84,19 @@ fn get_network() -> &'static mut VirtualNetwork {
     unsafe {
         if VIRTUAL_NETWORK.is_none() {
             let mut net = VirtualNetwork::new();
-            // Inject the dynamic challenge target if initialized
             if challenge::is_initialized() {
+                // M02 target
                 let ip = challenge::get_target_ip();
                 let port = challenge::get_backdoor_port();
                 net.add_dynamic_target(ip, port);
+                // M03 target
+                let ip3 = challenge::get_m03_target_ip();
+                let port3 = challenge::get_m03_backdoor_port();
+                net.add_dynamic_target(ip3, port3);
+                // M04 target
+                let ip4 = challenge::get_m04_target_ip();
+                let profile = challenge::get_m04_profile();
+                net.add_service_target(ip4, profile.port, profile.service_name);
             }
             VIRTUAL_NETWORK = Some(net);
         }
@@ -103,15 +118,133 @@ pub fn scan_host(args: &str) -> String {
     serialize_response(&response)
 }
 
-pub fn scan_host_impl(host: &str) -> CommandResponse {
-    if host.is_empty() {
-        return CommandResponse::error("Host is required. Usage: nmap <host>".to_string());
+pub fn scan_host_impl(args: &str) -> CommandResponse {
+    if args.is_empty() {
+        return CommandResponse::error("Usage: nmap [-sS] [-Pn] <host>".to_string());
     }
 
-    // Validate challenge: if user scans the correct dynamic IP, show backdoor port
-    let target_ip = challenge::get_target_ip();
-    let backdoor_port = challenge::get_backdoor_port();
+    // Parse flags and host from args
+    let tokens: Vec<&str> = args.split_whitespace().collect();
+    let mut stealth = false;
+    let mut skip_ping = false;
+    let mut version_scan = false;
+    let mut host = "";
 
+    for token in &tokens {
+        match *token {
+            "-sS" => stealth = true,
+            "-Pn" => skip_ping = true,
+            "-sV" => version_scan = true,
+            _ if token.starts_with('-') => { /* unknown flag, ignore */ }
+            _ => host = token,
+        }
+    }
+
+    // Route to version scan if -sV is present
+    if version_scan {
+        return nmap_version_scan_impl(host);
+    }
+
+    if host.is_empty() {
+        return CommandResponse::error("Host is required. Usage: nmap [-sS] [-Pn] <host>".to_string());
+    }
+
+    let m03_ip = challenge::get_m03_target_ip();
+    let m03_port = challenge::get_m03_backdoor_port();
+    let m02_ip = challenge::get_target_ip();
+    let m02_port = challenge::get_backdoor_port();
+
+    // ── Module 0.3 target (10.0.3.X) — stealth scan challenge ──
+    if host == m03_ip {
+        if !skip_ping {
+            // No -Pn: host appears down (ping blocked)
+            return CommandResponse::success(format!(
+                "Starting Nmap simulation for {}...\n\n\
+                 Note: Host seems down. If it is really up, but blocking our ping probes, try -Pn",
+                host
+            ));
+        }
+        if !stealth {
+            // Has -Pn but no -sS: IDS detects the noisy scan
+            return CommandResponse::success(format!(
+                "Starting Nmap simulation for {} (-Pn)...\n\n\
+                 \x1b[31m⚠️ [IDS ALERT]: Escaneo ruidoso detectado.\x1b[0m\n\
+                 Conexión completa registrada. Firewall perimetral bloqueó el tráfico.\n\
+                 \x1b[33mPista: Intenta con -sS para un escaneo sigiloso (half-open).\x1b[0m",
+                host
+            ));
+        }
+        // Both -sS and -Pn: successful stealth scan reveals the port
+        let mut output = format!("Starting Stealth SYN scan (-sS -Pn) for {}...\n\n", host);
+        output.push_str(&format!("Nmap scan report for {}\n", host));
+        output.push_str("Host is up (0.0008s latency).\n");
+        output.push_str("Scanning using SYN/ACK/RST method (half-open)\n\n");
+        output.push_str("Not shown: 997 closed ports\n");
+        output.push_str("PORT      STATE    SERVICE\n");
+        output.push_str(&format!("{:<9} {:<8} {}\n", "22/tcp", "open", "ssh"));
+        output.push_str(&format!("{:<9} {:<8} {}\n", "80/tcp", "open", "http"));
+        output.push_str(&format!("{:<9} {:<8} {}\n", format!("{}/tcp", m03_port), "open", "unknown-backdoor"));
+        output.push_str(&format!(
+            "\n\x1b[1;33m⚠ Puerto inusual detectado: {} — servicio desconocido\x1b[0m",
+            m03_port
+        ));
+        output.push_str(&format!(
+            "\n\x1b[32m✓ Escaneo stealth completado sin dejar registro en el IDS.\x1b[0m"
+        ));
+        output.push_str(&format!("\n\nNmap done: 1 IP address (1 host up) scanned in 0.23 seconds"));
+        return CommandResponse::success(output);
+    }
+
+    // ── Module 0.2 target (10.0.2.X) — basic scan challenge ──
+    if host == m02_ip {
+        let mut output = format!("Starting Nmap simulation for {}...\n\n", host);
+        output.push_str(&format!("Nmap scan report for {}\n", host));
+        output.push_str("Host is up (0.0012s latency).\n");
+        output.push_str("Not shown: 997 closed ports\n");
+        output.push_str("PORT      STATE    SERVICE\n");
+        output.push_str(&format!("{:<9} {:<8} {}\n", "22/tcp", "open", "ssh"));
+        output.push_str(&format!("{:<9} {:<8} {}\n", "80/tcp", "open", "http"));
+        output.push_str(&format!("{:<9} {:<8} {}\n", format!("{}/tcp", m02_port), "open", "unknown-backdoor"));
+        output.push_str(&format!(
+            "\n\x1b[1;33m⚠ Puerto inusual detectado: {} — servicio desconocido\x1b[0m",
+            m02_port
+        ));
+        output.push_str(&format!("\n\nNmap done: 1 IP address (1 host up) scanned in 0.15 seconds"));
+        return CommandResponse::success(output);
+    }
+
+    // ── Wrong IP in 10.0.3.x subnet — hint ──
+    if host.starts_with("10.0.3.") {
+        if !skip_ping {
+            return CommandResponse::success(format!(
+                "Starting Nmap simulation for {}...\n\n\
+                 Note: Host seems down. If it is really up, but blocking our ping probes, try -Pn",
+                host
+            ));
+        }
+        return CommandResponse::success(format!(
+            "Starting Nmap simulation for {} (-Pn)...\n\n\
+             All 1000 scanned ports on host are closed\n\
+             \n\x1b[33mPista: Este host no tiene puertos abiertos.\x1b[0m\n\
+             \x1b[33mPrueba con scan_network para descubrir hosts activos en 10.0.3.0/24\x1b[0m\n\
+             \nNmap done: 1 IP address (1 host up) scanned in 0.15 seconds",
+            host
+        ));
+    }
+
+    // ── Wrong IP in 10.0.2.x subnet — hint ──
+    if host.starts_with("10.0.2.") {
+        let mut output = format!("Starting Nmap simulation for {}...\n\n", host);
+        output.push_str(&format!("Nmap scan report for {}\n", host));
+        output.push_str("Host is up (0.0012s latency).\n");
+        output.push_str("All 1000 scanned ports on host are closed\n");
+        output.push_str(&format!("\n\x1b[33mPista: Este host no tiene puertos abiertos.\x1b[0m"));
+        output.push_str(&format!("\n\x1b[33mPrueba con scan_network para descubrir hosts activos en 10.0.2.0/24\x1b[0m"));
+        output.push_str(&format!("\n\nNmap done: 1 IP address (1 host up) scanned in 0.15 seconds"));
+        return CommandResponse::success(output);
+    }
+
+    // ── Generic host scan ──
     let network = get_network();
     let ports = network.get_host_ports(host);
 
@@ -119,39 +252,19 @@ pub fn scan_host_impl(host: &str) -> CommandResponse {
     output.push_str(&format!("Nmap scan report for {}\n", host));
     output.push_str("Host is up (0.0012s latency).\n");
 
-    if host == target_ip {
-        // Correct target! Show all ports including the dynamic backdoor
-        output.push_str("Not shown: 997 closed ports\n");
-        output.push_str("PORT      STATE    SERVICE\n");
-        output.push_str(&format!("{:<9} {:<8} {}\n", "22/tcp", "open", "ssh"));
-        output.push_str(&format!("{:<9} {:<8} {}\n", "80/tcp", "open", "http"));
-        output.push_str(&format!("{:<9} {:<8} {}\n", format!("{}/tcp", backdoor_port), "open", "unknown-backdoor"));
-        output.push_str(&format!("\n\x1b[1;33m⚠ Puerto inusual detectado: {} — servicio desconocido\x1b[0m\n", backdoor_port));
-        output.push_str(&format!("\nNmap done: 1 IP address (1 host up) scanned in 0.15 seconds"));
-    } else if host.starts_with("10.0.2.") {
-        // Wrong IP in the target subnet — hint
-        output.push_str("All 1000 scanned ports on host are closed\n");
-        output.push_str(&format!("\n\x1b[33mPista: Este host no tiene puertos abiertos.\x1b[0m"));
-        output.push_str(&format!("\n\x1b[33mPrueba con scan_network para descubrir hosts activos en 10.0.2.0/24\x1b[0m"));
-        output.push_str(&format!("\nNmap done: 1 IP address (1 host up) scanned in 0.15 seconds"));
-    } else if ports.is_empty() {
+    if ports.is_empty() {
         output.push_str("All 1000 scanned ports on host are closed\n");
     } else {
         let closed_count = 1000 - ports.len();
         output.push_str(&format!("Not shown: {} closed ports\n", closed_count));
         output.push_str("PORT      STATE    SERVICE\n");
-
         for p in &ports {
             output.push_str(&format!("{:<9} {:<8} {}\n",
-                format!("{}/tcp", p.port),
-                p.state,
-                p.service
-            ));
+                format!("{}/tcp", p.port), p.state, p.service));
         }
     }
 
     output.push_str(&format!("\nNmap done: 1 IP address (1 host up) scanned in 0.15 seconds"));
-
     CommandResponse::success(output)
 }
 
@@ -169,14 +282,20 @@ pub fn scan_network_impl() -> CommandResponse {
     let mut output = String::from("=== Network Scan Report ===\n\n");
     output.push_str(&format!("Discovered {} hosts:\n\n", hosts.len()));
 
-    let target_ip = challenge::get_target_ip();
+    let m02_ip = challenge::get_target_ip();
+    let m03_ip = challenge::get_m03_target_ip();
+    let m04_ip = challenge::get_m04_target_ip();
 
     for host in &hosts {
         let ports = network.get_host_ports(host);
         let open_count = ports.iter().filter(|p| p.state == "open").count();
 
-        if *host == target_ip {
-            output.push_str(&format!("\x1b[1;33m{} — {} open ports [TARGET]\x1b[0m\n", host, open_count));
+        if *host == m02_ip {
+            output.push_str(&format!("\x1b[1;33m{} — {} open ports [MODULO 0.2]\x1b[0m\n", host, open_count));
+        } else if *host == m03_ip {
+            output.push_str(&format!("\x1b[1;33m{} — {} open ports [MODULO 0.3]\x1b[0m\n", host, open_count));
+        } else if *host == m04_ip {
+            output.push_str(&format!("\x1b[1;33m{} — {} open ports [MODULO 0.4]\x1b[0m\n", host, open_count));
         } else {
             output.push_str(&format!("{} — {} open ports\n", host, open_count));
         }
@@ -190,7 +309,7 @@ pub fn scan_network_impl() -> CommandResponse {
     }
 
     if challenge::is_initialized() {
-        output.push_str(&format!("\x1b[33mPista: Busca el host con el puerto inusual en el rango 10.0.2.x\x1b[0m\n"));
+        output.push_str(&format!("\x1b[33mPista: Busca hosts activos en los rangos 10.0.2.x y 10.0.3.x\x1b[0m\n"));
     }
 
     CommandResponse::success(output)
@@ -275,6 +394,114 @@ fn serialize_response(response: &CommandResponse) -> String {
         serde_json::to_string(&CommandResponse::error(format!("Serialization error: {}", e)))
             .unwrap()
     })
+}
+
+// ── Netcat (nc) command ──
+
+/// Netcat: open a raw TCP connection to capture a banner
+#[wasm_bindgen]
+pub fn netcat(args: &str) -> String {
+    let response = netcat_impl(args);
+    serialize_response(&response)
+}
+
+pub fn netcat_impl(args: &str) -> CommandResponse {
+    let tokens: Vec<&str> = args.split_whitespace().collect();
+    if tokens.len() < 2 {
+        return CommandResponse::error("Usage: nc <host> <port>".to_string());
+    }
+
+    let host = tokens[0];
+    let port: u32 = match tokens[1].parse() {
+        Ok(p) => p,
+        Err(_) => return CommandResponse::error(format!("Invalid port: {}", tokens[1])),
+    };
+
+    let m04_ip = challenge::get_m04_target_ip();
+    let m04_profile = challenge::get_m04_profile();
+
+    if host == m04_ip && port == m04_profile.port {
+        // Correct target and port — return the banner
+        let mut output = format!("Connection to {} {} port [tcp/{}] succeeded!\n\n", host, port, m04_profile.service_name);
+        output.push_str(m04_profile.banner);
+        output.push_str("\n");
+        return CommandResponse::success(output);
+    }
+
+    // Check if host exists but port is wrong
+    let network = get_network();
+    let ports = network.get_host_ports(host);
+    if !ports.is_empty() {
+        let open_ports: Vec<u32> = ports.iter().filter(|p| p.state == "open").map(|p| p.port as u32).collect();
+        if open_ports.contains(&port) {
+            // Port is open on a known host — generic banner
+            return CommandResponse::success(format!(
+                "Connection to {} {} port [tcp] succeeded!\n\nService banner captured.",
+                host, port
+            ));
+        }
+        return CommandResponse::error(format!(
+            "nc: connect to {} port {} (tcp) failed: Connection refused\n\nPuerto {} no esta abierto en este host.",
+            host, port, port
+        ));
+    }
+
+    // Host not found
+    CommandResponse::error(format!(
+        "nc: connect to {} failed: No route to host",
+        host
+    ))
+}
+
+// ── nmap -sV version detection ──
+
+pub fn nmap_version_scan_impl(host: &str) -> CommandResponse {
+    let m04_ip = challenge::get_m04_target_ip();
+    let m04_profile = challenge::get_m04_profile();
+
+    let mut output = format!("Starting Nmap version scan (-sV) for {}...\n\n", host);
+    output.push_str(&format!("Nmap scan report for {}\n", host));
+    output.push_str("Host is up (0.0010s latency).\n");
+
+    if host == m04_ip {
+        output.push_str("Not shown: 999 closed ports\n");
+        output.push_str("PORT   STATE  SERVICE  VERSION\n");
+        output.push_str(&format!("{:<6} {:<6} {:<8} {}\n",
+            format!("{}/tcp", m04_profile.port),
+            "open",
+            m04_profile.service_name,
+            m04_profile.banner
+        ));
+        output.push_str(&format!(
+            "\n\x1b[1;33m Service detected: {}\x1b[0m",
+            m04_profile.banner
+        ));
+        output.push_str(&format!(
+            "\n\x1b[33m Pista: Busca este software en bases de datos CVE para encontrar vulnerabilidades.\x1b[0m"
+        ));
+    } else if host.starts_with("10.0.4.") {
+        output.push_str("All 1000 scanned ports on host are closed\n");
+        output.push_str(&format!("\n\x1b[33mPista: Este host no tiene servicios activos.\x1b[0m"));
+        output.push_str(&format!("\n\x1b[33mUsa scan_network para descubrir hosts en 10.0.4.0/24\x1b[0m"));
+    } else {
+        // Generic host
+        let network = get_network();
+        let ports = network.get_host_ports(host);
+        if ports.is_empty() {
+            output.push_str("All 1000 scanned ports on host are closed\n");
+        } else {
+            output.push_str("PORT   STATE  SERVICE  VERSION\n");
+            for p in &ports {
+                if p.state == "open" {
+                    output.push_str(&format!("{:<6} {:<6} {:<8} Simulated\n",
+                        format!("{}/tcp", p.port), "open", p.service));
+                }
+            }
+        }
+    }
+
+    output.push_str(&format!("\nNmap done: 1 IP address (1 host up) scanned in 0.45 seconds"));
+    CommandResponse::success(output)
 }
 
 #[cfg(test)]

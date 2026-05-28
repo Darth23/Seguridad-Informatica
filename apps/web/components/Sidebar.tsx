@@ -11,6 +11,8 @@ interface SidebarProps {
 const LESSONS = [
   { id: '0.1', title: 'Modulo 0.1: Navegacion en la Terminal', icon: '💻', type: 'lesson' as const },
   { id: '0.2', title: 'Modulo 0.2: Redes y Paquetes', icon: '🌐', type: 'lesson' as const },
+  { id: '0.3', title: 'Modulo 0.3: Escaneo Sigiloso', icon: '🕵️', type: 'lesson' as const },
+  { id: '0.4', title: 'Modulo 0.4: Banner Grabbing', icon: '🔍', type: 'lesson' as const },
 ];
 
 function AchievementsPreview() {

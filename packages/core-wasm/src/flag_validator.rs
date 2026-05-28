@@ -64,34 +64,58 @@ pub fn submit_flag_impl(flag: &str) -> CommandResponse {
         return CommandResponse::error("Usage: flag <flag_value_or_port>".to_string());
     }
 
+    let trimmed = flag.trim();
+
     // Check if the input is a numeric port (dynamic challenge mode)
-    if let Ok(port) = flag.trim().parse::<u32>() {
-        let backdoor_port = challenge::get_backdoor_port();
-        if challenge::is_initialized() && port == backdoor_port {
+    if let Ok(port) = trimmed.parse::<u32>() {
+        let m02_port = challenge::get_backdoor_port();
+        let m03_port = challenge::get_m03_backdoor_port();
+
+        if challenge::is_initialized() && port == m02_port {
             return CommandResponse::success(format!(
-                "\x1b[32m✓ Correct! Puerto {} validado como backdoor.\x1b[0m\n\
-                 Points awarded: 200\n\
-                 Has completado el reto de redes de Modulo 0.2!",
+                "\x1b[32m✓ Correct! Puerto {} validado como backdoor del Modulo 0.2.\x1b[0m\n\
+                 Points awarded: 200",
                 port
             ));
-        } else {
-            return CommandResponse::error(format!(
-                "\x1b[31m✗ Puerto {} no es el backdoor correcto.\x1b[0m\n\
-                 Hint: Usa nmap para descubrir que IP esta activa en tu segmento 10.0.2.0/24 y que puerto anomalo tiene abierto.",
+        }
+
+        if challenge::is_initialized() && port == m03_port {
+            return CommandResponse::success(format!(
+                "\x1b[32m✓ Correct! Puerto {} validado como backdoor del Modulo 0.3.\x1b[0m\n\
+                 Points awarded: 300",
                 port
+            ));
+        }
+
+        return CommandResponse::error(format!(
+            "\x1b[31m✗ Puerto {} no es el backdoor correcto.\x1b[0m\n\
+             Hint: Usa nmap con los parametros correctos para descubrir el puerto abierto.",
+            port
+        ));
+    }
+
+    // Check if the input matches a Module 0.4 service profile flag (string-based)
+    if challenge::is_initialized() {
+        let m04_flag = challenge::get_m04_flag();
+        if trimmed == m04_flag {
+            return CommandResponse::success(format!(
+                "\x1b[32m✓ Correct! Banner '{}' validado del Modulo 0.4.\x1b[0m\n\
+                 Points awarded: 400\n\
+                 Has completado el reto de enumeracion de servicios!",
+                trimmed
             ));
         }
     }
 
     // Traditional FLAG{} format validation
     let flag_pattern = Regex::new(r"^FLAG\{[a-zA-Z0-9_]+\}$").unwrap();
-    if !flag_pattern.is_match(flag) {
+    if !flag_pattern.is_match(trimmed) {
         return CommandResponse::error(
-            "Invalid format. Use: flag <port_number> or flag FLAG{...}".to_string()
+            "Invalid format. Use: flag <port>, flag <version>, or flag FLAG{...}".to_string()
         );
     }
 
-    if is_honey_flag(flag) {
+    if is_honey_flag(trimmed) {
         unsafe { HONEY_ALERT_COUNT += 1; }
         return CommandResponse::error(
             "\x1b[31m⚠ HONEY FLAG DETECTED!\x1b[0m\n\
@@ -99,10 +123,10 @@ pub fn submit_flag_impl(flag: &str) -> CommandResponse {
         );
     }
 
-    if validate_flag_hash(flag) {
-        let hash = compute_flag_hash(flag);
-        let pbkdf2_key = derive_key(flag.as_bytes());
-        let obfuscated = xor_encrypt(flag.as_bytes(), XOR_KEY);
+    if validate_flag_hash(trimmed) {
+        let hash = compute_flag_hash(trimmed);
+        let pbkdf2_key = derive_key(trimmed.as_bytes());
+        let obfuscated = xor_encrypt(trimmed.as_bytes(), XOR_KEY);
 
         CommandResponse::success(format!(
             "\x1b[32m✓ Correct! Flag validated successfully!\x1b[0m\n\

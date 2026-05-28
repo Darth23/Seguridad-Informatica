@@ -66,6 +66,7 @@ fn execute_command(command: &str, args: &str) -> CommandResponse {
         // Network commands
         "nmap" => network::scan_host_impl(args),
         "scan_network" => network::scan_network_impl(),
+        "nc" => network::netcat_impl(args),
         "ping" => network::ping_host_impl(args),
         "http_get" => network::http_get_impl(args),
         
