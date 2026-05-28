@@ -32,6 +32,9 @@ declare module '@cyber-edu/core-wasm' {
   export function boss_reset(): string;
   export function get_honey_alerts(): string;
   export function get_flag_hints(): string;
+  export function exploit_service(args: string): string;
+  export function shell_status(): string;
+  export function shell_reset(): string;
   export function analytics_skill_breakdown(args: string): string;
   export function analytics_calculate_streaks(args: string): string;
   export function analytics_time_metrics(args: string): string;

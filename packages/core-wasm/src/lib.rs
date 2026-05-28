@@ -11,6 +11,7 @@ pub mod rate_limiter;
 pub mod boss_simulator;
 pub mod analytics_engine;
 pub mod challenge;
+pub mod shell_state;
 
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
@@ -69,6 +70,11 @@ fn execute_command(command: &str, args: &str) -> CommandResponse {
         "nc" => network::netcat_impl(args),
         "ping" => network::ping_host_impl(args),
         "http_get" => network::http_get_impl(args),
+        
+        // Shell commands
+        "exploit_service" => shell_state::exploit_service_impl(args),
+        "shell_status" => shell_state::get_shell_status_impl(),
+        "shell_reset" => shell_state::reset_shell_impl(),
         
         // Crypto commands
         "hash" => crypto::hash_data_impl(args),

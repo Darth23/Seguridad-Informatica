@@ -14,6 +14,18 @@ interface XtermWorkspaceProps {
   initialCommands?: string[];
 }
 
+// Get the current prompt from WASM shell state
+async function getPrompt(): Promise<string> {
+  try {
+    const resp: CommandResponse = await processCommand('shell_status', '');
+    if (resp.success) {
+      const status = JSON.parse(resp.output);
+      return status.prompt || 'user@cyberedu:~$ ';
+    }
+  } catch { /* ignore */ }
+  return 'user@cyberedu:~$ ';
+}
+
 function handleDefaultCommand(command: string): string {
   const parts = command.split(' ');
   const cmd = parts[0].toLowerCase();
@@ -29,13 +41,17 @@ function handleDefaultCommand(command: string): string {
         '  \x1b[32mpwd\x1b[0m                Muestra directorio actual',
         '  \x1b[32mcd\x1b[0m [dir]           Cambia de directorio',
         '  \x1b[32mcat\x1b[0m [archivo]      Muestra contenido (WASM)',
-        '  \x1b[32mnmap\x1b[0m [host]        Escaneo de red (WASM)',
+        '  \x1b[32mnmap\x1b0m [opts] [IP]   Escaneo de red (WASM)',
         '  \x1b[32mscan_network\x1b[0m      Escanea red virtual completa',
-        '  \x1b[32mflag\x1b[0m [valor]       Envia una flag CTF (WASM)',
-        '  \x1b[32mhash\x1b[0m [data]        Hash de datos (WASM)',
-        '  \x1b[32manalyze_log\x1b[0m [log]  Analiza logs (WASM)',
-        '  \x1b[32mboss_start\x1b[0m        Inicia boss fight',
-        '  \x1b[32mboss_damage\x1b[0m [n]   Ataca al boss',
+        '  \x1b[32mnc\x1b[0m [host] [port]  Conexion TCP / Listener',
+        '  \x1b[32mnc -lvnp\x1b[0m [port]  Abre un listener (Mod 0.5)',
+        '  \x1b[32mexploit_service\x1b[0m  Explota un servicio (Mod 0.5)',
+        '  \x1b[32mflag\x1b[0m [valor]     Envia una flag CTF (WASM)',
+        '  \x1b[32mhash\x1b[0m [data]      Hash de datos (WASM)',
+        '  \x1b[32manalyze_log\x1b[0m [l]  Analiza logs (WASM)',
+        '  \x1b[32mboss_start\x1b[0m      Inicia boss fight',
+        '  \x1b[32mboss_damage\x1b[0m [n] Ataca al boss',
+        '  \x1b[32mexit\x1b[0m             Cierra reverse shell (Mod 0.5)',
       ].join('\r\n');
     case 'pwd':
       return '/home/user';
@@ -61,8 +77,9 @@ export function XtermWorkspace({ initialCommands = [] }: XtermWorkspaceProps) {
   const { addTerminalLine } = useUIStore();
   const { isReady, setIsReady, addCommand } = useTerminalStore();
 
-  const writePrompt = useCallback((term: Terminal) => {
-    term.write('\r\n\x1b[32muser@cyberedu\x1b[0m:\x1b[34m~\x1b[0m$ ');
+  const writePrompt = useCallback(async (term: Terminal) => {
+    const prompt = await getPrompt();
+    term.write(`\r\n\x1b[32m${prompt}\x1b[0m`);
   }, []);
 
   const executeCommand = useCallback(async (term: Terminal, command: string) => {
@@ -70,6 +87,24 @@ export function XtermWorkspace({ initialCommands = [] }: XtermWorkspaceProps) {
     const parts = command.split(/\s+/);
     const cmd = parts[0].toLowerCase();
     const args = parts.slice(1).join(' ');
+
+    // Handle exit command locally
+    if (cmd === 'exit') {
+      const resp = await processCommand('shell_status', '');
+      if (resp.success) {
+        const status = JSON.parse(resp.output);
+        if (status.in_reverse_shell) {
+          await processCommand('shell_reset', '');
+          term.writeln('[*] Connection closed.');
+          term.writeln('[*] Sesion de reverse shell finalizada.');
+          await writePrompt(term);
+          return;
+        }
+      }
+      term.writeln('No hay sesion activa.');
+      await writePrompt(term);
+      return;
+    }
 
     let output = '';
     try {
@@ -87,7 +122,9 @@ export function XtermWorkspace({ initialCommands = [] }: XtermWorkspaceProps) {
 
     if (output) term.writeln(output);
     addTerminalLine(`${command}: ${output || '(empty)'}`);
-    writePrompt(term);
+
+    // After command, write dynamic prompt (may have changed after exploit/exit)
+    await writePrompt(term);
   }, [addCommand, addTerminalLine, writePrompt]);
 
   useEffect(() => {
@@ -123,7 +160,7 @@ export function XtermWorkspace({ initialCommands = [] }: XtermWorkspaceProps) {
     xtermRef.current = t;
 
     let initDone = false;
-    const doInit = () => {
+    const doInit = async () => {
       if (initDone) return;
       initDone = true;
 
@@ -142,10 +179,10 @@ export function XtermWorkspace({ initialCommands = [] }: XtermWorkspaceProps) {
         t.writeln(`\x1b[32muser@cyberedu\x1b[0m:\x1b[34m~\x1b[0m$ ${cmd}`);
       });
 
-      writePrompt(t);
+      await writePrompt(t);
       setIsReady(true);
 
-      // All keyboard input via xterm.js onData — no HTML input needed
+      // All keyboard input via xterm.js onData
       t.onData((data) => {
         const code = data.charCodeAt(0);
 
@@ -182,9 +219,9 @@ export function XtermWorkspace({ initialCommands = [] }: XtermWorkspaceProps) {
 
     const unsubscribe = t.onRender(() => {
       unsubscribe.dispose();
-      setTimeout(doInit, 100);
+      setTimeout(() => { doInit(); }, 100);
     });
-    const fallbackTimer = setTimeout(doInit, 500);
+    const fallbackTimer = setTimeout(() => { doInit(); }, 500);
 
     const handleResize = () => {
       if (terminalRef.current && terminalRef.current.clientHeight > 0) fitAddon.fit();

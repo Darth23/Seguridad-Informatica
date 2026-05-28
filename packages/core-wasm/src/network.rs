@@ -407,6 +407,23 @@ pub fn netcat(args: &str) -> String {
 
 pub fn netcat_impl(args: &str) -> CommandResponse {
     let tokens: Vec<&str> = args.split_whitespace().collect();
+    if tokens.is_empty() {
+        return CommandResponse::error("Usage: nc [-lvnp] <host> <port> or nc -lvnp <port>".to_string());
+    }
+
+    // Check for listener mode: nc -lvnp <port>
+    if tokens[0] == "-lvnp" {
+        if tokens.len() < 2 {
+            return CommandResponse::error("Usage: nc -lvnp <port>".to_string());
+        }
+        let port: u32 = match tokens[1].parse() {
+            Ok(p) => p,
+            Err(_) => return CommandResponse::error(format!("Invalid port: {}", tokens[1])),
+        };
+        let output = crate::shell_state::start_listener(port);
+        return CommandResponse::success(output);
+    }
+
     if tokens.len() < 2 {
         return CommandResponse::error("Usage: nc <host> <port>".to_string());
     }

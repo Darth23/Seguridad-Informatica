@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { Sidebar } from './Sidebar';
 import { useUIStore } from '@/lib/stores/uiStore';
 import { useEffect } from 'react';
-import { LESSON_0_1, LESSON_0_2, LESSON_0_3, LESSON_0_4 } from './lessons';
+import { LESSON_0_1, LESSON_0_2, LESSON_0_3, LESSON_0_4, LESSON_0_5 } from './lessons';
 
 const XtermWorkspace = dynamic(
   () => import('./XtermWorkspace').then((m) => m.XtermWorkspace),
@@ -16,6 +16,7 @@ const LESSONS: Record<string, string> = {
   '0.2': LESSON_0_2,
   '0.3': LESSON_0_3,
   '0.4': LESSON_0_4,
+  '0.5': LESSON_0_5,
 };
 
 export default function AppLayout() {
