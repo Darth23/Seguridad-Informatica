@@ -11,6 +11,58 @@ const XtermWorkspace = dynamic(
   { ssr: false }
 );
 
+const LESSON_0_1 = `# Módulo 0.1: Navegación Eficiente en la Terminal
+
+## 🛠️ Conceptos Clave
+
+### El sistema de archivos Linux
+
+El sistema de archivos Linux se organiza en una estructura de árbol jerárquica. Cada ruta comienza desde el directorio raíz **\`/\`**.
+
+- **Ruta absoluta:** Comienza desde \`/\` → \`/var/log/auth.log\`
+- **Ruta relativa:** Comienza desde tu posición actual → \`../../etc/passwd\`
+- **Directorio home:** Tu directorio personal \`~/\` o \`/home/usuario/\`
+
+### Navegación básica
+
+| Comando | Descripción | Ejemplo |
+|---------|-------------|---------|
+| \`pwd\` | Muestra el directorio actual | \`pwd\` → \`/home/user\` |
+| \`ls -la\` | Lista archivos con detalles y ocultos | \`ls -la /var/log\` |
+| \`cd\` | Cambia de directorio | \`cd /etc\` |
+| \`cat\` | Muestra el contenido de un archivo | \`cat /etc/hostname\` |
+
+### Atajos de terminal
+
+| Atajo | Acción |
+|-------|--------|
+| \`Tab\` | Autocompleta comandos y rutas |
+| \`Ctrl+C\` | Cancela el comando en ejecución |
+| \`Ctrl+L\` | Limpia la pantalla |
+| \`↑/↓\` | Navega por el historial de comandos |
+
+---
+
+## 🚨 Tip Pro
+
+> Usa la tecla **Tabulador (Tab)** para autocompletar nombres de archivos y comandos. Escribe las primeras letras y presiona Tab — el sistema completará la ruta si hay una coincidencia única.
+
+---
+
+## 🎯 Reto Práctico
+
+**Objetivo:** Navega a \`/var/log/\` y analiza los archivos de log del sistema.
+
+1. Usa \`cd /var/log\` para navegar al directorio de logs
+2. Ejecuta \`ls -la\` para ver todos los archivos disponibles
+3. Usa \`cat\` para leer \`auth.log\` y buscar intentos de acceso fallidos
+4. Busca la FLAG oculta usando \`grep\` en los logs
+
+> **FLAG{log_analysis_expert}** se encuentra oculta en uno de los archivos de log.
+
+Usa la terminal de la derecha para completar el reto. Escribe \`help\` para ver los comandos disponibles.
+`;
+
 export default function AppLayout() {
   const roadmapData: any = [];
   const { toggleHighContrast, setFocusedPanel } = useUIStore();
@@ -57,9 +109,10 @@ export default function AppLayout() {
         style={{ flex: '1 1 0%', minWidth: 0, height: '100vh', overflow: 'auto', background: '#0a0f1d' }}
         className="flex-1 h-full bg-[#0a0f1d] p-8 overflow-y-auto border-r border-slate-800 flex flex-col"
         data-tour="content"
+        id="content-panel"
       >
         <div className="prose prose-invert max-w-none">
-          <MarkdownReader content="" />
+          <MarkdownReader content={LESSON_0_1} />
         </div>
       </main>
 

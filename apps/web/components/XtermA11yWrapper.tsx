@@ -91,7 +91,7 @@ export function XtermA11yWrapper({ children, isReady }: XtermA11yWrapperProps) {
         {children}
       </div>
 
-      {/* Skip Link for Quick Navigation */}
+      {/* Skip Link — sr-only, visible only to screen readers and on keyboard focus */}
       <a
         href="#content-panel"
         className="sr-only focus:not-sr-only focus:absolute focus:bottom-2 focus:right-2 focus:px-3 focus:py-2 focus:bg-yellow-500 focus:text-black focus:font-bold focus:rounded focus:z-50"
