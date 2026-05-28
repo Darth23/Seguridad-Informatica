@@ -32,6 +32,7 @@
     "yjs": "^13.6.15",
     "webrtc-adapter": "^9.0.1",
     "shepherd.js": "^13.0.2",
+    "recharts": "^2.12.7",
     "@cyber-edu/types": "workspace:*",
     "@cyber-edu/core-wasm": "workspace:*"
   },
