@@ -1,0 +1,259 @@
+---
+id: "network-scanning"
+title: "Escaneo de Redes con Nmap"
+description: "Aprende a identificar hosts activos, puertos abiertos y servicios en una red objetivo"
+type: "lesson"
+order: 1
+estimatedTime: 45
+difficulty: "beginner"
+prerequisites:
+  - "onboarding-welcome"
+objectives:
+  - "Comprender los fundamentos del escaneo de puertos TCP/UDP"
+  - "Utilizar nmap para identificar servicios y versiones"
+  - "Interpretar resultados de escaneo y identificar vulnerabilidades potenciales"
+flag: "NMAP_SCAN_MASTER_v2"
+flagHash: "b8c9d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5"
+maxPoints: 100
+category: "network"
+hints:
+  - content: "Usa el flag -sS para un SYN scan sigiloso"
+    penalty: 10
+  - content: "El puerto 22 suele estar abierto para SSH"
+    penalty: 20
+  - content: "La version del servicio puede revelar vulnerabilidades conocidas"
+    penalty: 30
+---
+
+# 🌐 Escaneo de Redes con Nmap
+
+## Introduccion al Reconocimiento de Red
+
+El escaneo de redes es la primera fase en cualquier evaluacion de seguridad. Antes de poder proteger (o atacar) un sistema, necesitas saber que hay en la red.
+
+> 💡 **Principio Fundamental**: "No puedes proteger lo que no conoces." El reconocimiento es esencial tanto para defensores como para pentesters.
+
+## Fundamentos de TCP/IP Relevantes
+
+### Handshake TCP de 3 Vias
+
+```
+Cliente                    Servidor
+   |                          |
+   |-------- SYN --------->   |  (1) Sincronizacion
+   |                          |
+   |<------- SYN-ACK -------  |  (2) Reconocimiento + Sincronizacion
+   |                          |
+   |-------- ACK --------->   |  (3) Confirmacion
+   |                          |
+   ====== Conexion Establecida ======
+```
+
+### Tipos de Puertos Comunes
+
+| Puerto | Protocolo | Servicio | Riesgo |
+|--------|-----------|----------|--------|
+| 21 | TCP | FTP | Alto (cleartext) |
+| 22 | TCP | SSH | Bajo (encriptado) |
+| 23 | TCP | Telnet | Critico (cleartext) |
+| 80 | TCP | HTTP | Medio |
+| 443 | TCP | HTTPS | Bajo |
+| 3306 | TCP | MySQL | Medio (si esta expuesto) |
+
+> 🚨 **Advertencia**: Escanear redes sin autorizacion es ilegal. Practica solo en entornos controlados como este laboratorio.
+
+## Comandos Esenciales de Nmap
+
+### Escaneo Basico de Puertos
+
+```bash
+# Escaneo rapido de puertos comunes
+nmap -F 192.168.1.1
+
+# Escaneo completo de todos los puertos (1-65535)
+nmap -p- 192.168.1.1
+
+# Escaneo de puertos especificos
+nmap -p 22,80,443 192.168.1.1
+```
+
+### Tipos de Scan
+
+```bash
+# SYN Scan (sigiloso, requiere root)
+nmap -sS 192.168.1.1
+
+# Connect Scan (completo, no requiere privilegios)
+nmap -sT 192.168.1.1
+
+# UDP Scan (mas lento pero descubre servicios UDP)
+nmap -sU 192.168.1.1
+
+# Version Detection (identifica versiones de servicios)
+nmap -sV 192.168.1.1
+
+# OS Detection (intenta identificar el sistema operativo)
+nmap -O 192.168.1.1
+```
+
+### Scripts de NSE (Nmap Scripting Engine)
+
+```bash
+# Ejecutar scripts de vulnerabilidad
+nmap --script vuln 192.168.1.1
+
+# Scripts de descubrimiento
+nmap --script discovery 192.168.1.1
+
+# Script especifico para SMB
+nmap --script smb-enum-shares 192.168.1.1
+```
+
+## Laboratorio Practico
+
+### Objetivo del Desafio
+
+Tienes acceso a una red objetivo simulada. Tu mision:
+
+1. Identificar todos los hosts activos
+2. Enumerar puertos abiertos
+3. Determinar versiones de servicios
+4. Identificar al menos una vulnerabilidad potencial
+
+### Paso 1: Descubrimiento de Hosts
+
+```bash
+# Usar ping sweep para encontrar hosts activos
+nmap -sn 10.0.0.0/24
+```
+
+<Flashcard
+  question="Que significa el flag -sn en nmap?"
+  answer="-sn realiza un ping scan sin escaneo de puertos. Solo verifica si los hosts estan activos."
+/>
+
+### Paso 2: Escaneo de Puertos
+
+Una vez identificados los hosts activos, realiza un escaneo detallado:
+
+```bash
+# En tu terminal virtual, ejecuta:
+$ nmap -sV -sC 10.0.0.50
+```
+
+Salida esperada:
+
+```
+Starting Nmap 7.94
+Nmap scan report for 10.0.0.50
+Host is up (0.0023s latency).
+Not shown: 997 closed ports
+
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu
+80/tcp open  http    Apache httpd 2.4.41
+3306/tcp open  mysql MySQL 5.7.32
+
+Service detection performed.
+Nmap done: 1 IP address (1 host up) scanned in 3.45 seconds
+```
+
+### Paso 3: Analisis de Resultados
+
+> 🛠️ **Analisis Profesional**: 
+> - **OpenSSH 8.2p1**: Version actualizada, probablemente segura
+> - **Apache 2.4.41**: Verificar CVEs conocidos
+> - **MySQL 5.7.32**: Deberia estar expuesto a la red?
+
+## Interpretando Estados de Puertos
+
+| Estado | Significado | Implicacion |
+|--------|-------------|-------------|
+| open | Acepta conexiones | Servicio activo, posible vector de ataque |
+| closed | Rechaza conexiones | Host alcanzable, servicio no corriendo |
+| filtered | Sin respuesta | Firewall bloqueando, necesita mas investigacion |
+| unfiltered | Responde pero estado desconocido | Raro, requiere tecnicas avanzadas |
+
+```bash
+# Combinar multiples tecnicas para mejor precision
+nmap -sS -sV -O -A 10.0.0.50
+```
+
+> 💡 **Tip Profesional**: Usa -A para aggressive mode que combina -sV, -sC, -O y traceroute.
+
+## Deteccion de Vulnerabilidades
+
+### Usando NSE Scripts
+
+```bash
+# Escaneo de vulnerabilidades comunes
+nmap --script vuln 10.0.0.50
+
+# Resultado ejemplo:
+# | vuln:
+# |   VULNERABLE:
+# |   Apache Range DoS (CVE-2011-3192)
+# |     State: VULNERABLE
+# |     Risk factor: Medium
+```
+
+### Analisis Manual de Versiones
+
+1. Anota todas las versiones detectadas
+2. Busca en CVE Details
+3. Prioriza por severidad (CVSS score)
+
+<Flashcard
+  question="Que es CVSS?"
+  answer="Common Vulnerability Scoring System. Puntuacion del 0 al 10 que indica la severidad de una vulnerabilidad."
+/>
+
+## Buenas Practicas de Escaneo
+
+### DO (Haz esto)
+
+- Obten autorizacion escrita antes de escanear
+- Documenta todos tus hallazgos
+- Usa tecnicas sigilosas cuando sea necesario
+- Respeta los rate limits para evitar DoS accidental
+
+### DON'T (No hagas esto)
+
+- Nunca escanees redes sin permiso
+- No uses scripts agresivos en produccion
+- Evita escaneos masivos que puedan saturar la red
+- No compartas resultados publicamente sin autorizacion
+
+## Tu Desafio Final
+
+En el terminal virtual, tienes acceso a una red simulada `172.16.0.0/24`.
+
+**Objetivos:**
+
+1. Encuentra todos los hosts activos
+2. Identifica el host con el puerto 22 abierto
+3. Determina la version exacta de OpenSSH
+4. Encuentra el servicio web y su version
+
+**Comandos disponibles en tu terminal:**
+
+```bash
+$ nmap [opciones] [objetivo]
+$ help nmap  # Para ver todas las opciones
+```
+
+Cuando tengas toda la informacion, valida tu flag:
+
+> 🎯 **Flag Format**: `NMAP_SCAN_MASTER_v2`
+
+Introducela en el panel de validacion para completar esta leccion.
+
+---
+
+## Recursos Adicionales
+
+- [Nmap Official Documentation](https://nmap.org/docs.html)
+- [Nmap Cheat Sheet](https://nmap.org/book/man-briefoptions.html)
+- [CVE Database](https://cve.mitre.org/)
+
+**Proxima Leccion**: Analisis de Trafico de Red con Wireshark

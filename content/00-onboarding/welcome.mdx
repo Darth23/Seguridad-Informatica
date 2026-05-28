@@ -1,0 +1,130 @@
+---
+id: "onboarding-welcome"
+title: "Bienvenido a CyberEdu Zero-Trust Academy"
+description: "Introducción a la plataforma y configuración inicial del entorno de aprendizaje"
+type: "lesson"
+order: 1
+estimatedTime: 15
+difficulty: "beginner"
+objectives:
+  - "Comprender la arquitectura zero-trust de la plataforma"
+  - "Configurar el terminal virtual y las herramientas básicas"
+  - "Familiarizarse con la interfaz de 3 paneles"
+flag: "WELCOME2CYBEREDU_2024"
+flagHash: "a7b9c3d2e1f0a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3"
+---
+
+# 🎓 Bienvenido a CyberEdu Zero-Trust Academy
+
+## Introducción
+
+Has dado el primer paso para convertirte en un experto en ciberseguridad. Esta plataforma está diseñada bajo el principio **Zero-Trust**: nada es confiable por defecto, todo debe ser verificado.
+
+> 💡 **Concepto Clave**: Zero-Trust significa que nunca asumimos que algo es seguro solo porque está "dentro" de nuestra red. Cada acceso debe ser autenticado y autorizado.
+
+## Arquitectura de la Plataforma
+
+Nuestra plataforma opera 100% en el navegador:
+
+```
+┌─────────────────────────────────────────────────┐
+│                 Tu Navegador                    │
+│  ┌─────────┬──────────────┬─────────────────┐  │
+│  │ Sidebar │   Contenido  │    Terminal     │  │
+│  │  (JSON) │    (MDX)     │     (WASM)      │  │
+│  └─────────┴──────────────┴─────────────────┘  │
+│         IndexedDB + localStorage + SW           │
+└─────────────────────────────────────────────────┘
+```
+
+### Componentes Principales
+
+1. **Sidebar (Izquierdo)**: Navegación JSON-driven con progreso persistente
+2. **Panel Central**: Contenido educativo renderizado desde MDX
+3. **Terminal (Derecho/Inferior)**: Xterm.js conectado a módulos WASM
+
+> 🚨 **Advertencia de Seguridad**: Todo el procesamiento ocurre localmente. Tus datos NUNCA salen del navegador.
+
+## Tu Primer Desafío
+
+Antes de comenzar, necesitamos verificar que tu terminal está funcionando correctamente.
+
+### Paso 1: Abre la Terminal
+
+Presiona `Ctrl + Shift + T` o haz clic en el panel derecho para enfocar la terminal.
+
+### Paso 2: Ejecuta el Comando de Verificación
+
+```bash
+$ cyber-edu --verify
+```
+
+Deberías ver una salida similar a:
+
+```
+✓ Sistema verificado
+✓ Módulos WASM cargados
+✓ Entorno listo para aprendizaje
+```
+
+> 🛠️ **Problemas Comunes**: Si la terminal no responde, verifica que JavaScript esté habilitado en tu navegador.
+
+## Sistema de Progreso
+
+Cada lección completada desbloquea la siguiente. El progreso se guarda automáticamente en:
+
+- **localStorage**: Configuración y estado UI
+- **IndexedDB**: Datos de analíticas y progreso detallado
+
+```typescript
+// Ejemplo de estructura de progreso
+{
+  userId: "user-uuid",
+  completedLessons: ["onboarding-welcome"],
+  achievements: ["first-steps"],
+  settings: {
+    theme: "dark",
+    language: "es"
+  }
+}
+```
+
+## Atajos de Teclado Esenciales
+
+| Atajo | Acción |
+|-------|--------|
+| `Ctrl + K` | Abrir paleta de comandos |
+| `Ctrl + 1/2/3` | Enfocar paneles |
+| `Ctrl + Shift + H` | Alternar alto contraste |
+| `Ctrl + L` | Limpiar terminal |
+| `Ctrl + Enter` | Enviar comando |
+
+> 💡 **Tip de Accesibilidad**: Todos los atajos son personalizables en la configuración.
+
+## Flashcard de Repaso
+
+<Flashcard
+  question="¿Qué significa Zero-Trust?"
+  answer="Zero-Trust es un modelo de seguridad que no confía en ninguna entidad por defecto, requiriendo verificación continua de cada acceso."
+/>
+
+<Flashcard
+  question="¿Dónde se procesan los datos en esta plataforma?"
+  answer="100% en el navegador del usuario, usando WASM, IndexedDB y Service Workers. Nada sale al servidor."
+/>
+
+## Próximos Pasos
+
+Una vez que hayas completado este onboarding:
+
+1. ✅ Verifica tu terminal
+2. ✅ Explora el sidebar
+3. ✅ Avanza a la primera lección de redes
+
+Tu flag de completación es: `WELCOME2CYBEREDU_2024`
+
+> 🎯 **Objetivo**: Introduce la flag en el panel de validación para desbloquear el siguiente módulo.
+
+---
+
+**¿Listo para comenzar?** Avanza al módulo de **Network Security** donde aprenderás sobre escaneo de redes y análisis de puertos.
