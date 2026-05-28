@@ -2,7 +2,7 @@
 //! Provides CTF flag validation with anti-cheat features
 
 use wasm_bindgen::prelude::*;
-use crate::CommandResponse;
+use crate::{CommandResponse, challenge};
 use regex::Regex;
 use sha2::{Sha256, Digest};
 use pbkdf2::pbkdf2_hmac;
@@ -61,13 +61,33 @@ pub fn submit_flag(args: &str) -> String {
 
 pub fn submit_flag_impl(flag: &str) -> CommandResponse {
     if flag.is_empty() {
-        return CommandResponse::error("Usage: flag <flag_value>".to_string());
+        return CommandResponse::error("Usage: flag <flag_value_or_port>".to_string());
     }
 
+    // Check if the input is a numeric port (dynamic challenge mode)
+    if let Ok(port) = flag.trim().parse::<u32>() {
+        let backdoor_port = challenge::get_backdoor_port();
+        if challenge::is_initialized() && port == backdoor_port {
+            return CommandResponse::success(format!(
+                "\x1b[32m✓ Correct! Puerto {} validado como backdoor.\x1b[0m\n\
+                 Points awarded: 200\n\
+                 Has completado el reto de redes de Modulo 0.2!",
+                port
+            ));
+        } else {
+            return CommandResponse::error(format!(
+                "\x1b[31m✗ Puerto {} no es el backdoor correcto.\x1b[0m\n\
+                 Hint: Usa nmap para descubrir que IP esta activa en tu segmento 10.0.2.0/24 y que puerto anomalo tiene abierto.",
+                port
+            ));
+        }
+    }
+
+    // Traditional FLAG{} format validation
     let flag_pattern = Regex::new(r"^FLAG\{[a-zA-Z0-9_]+\}$").unwrap();
     if !flag_pattern.is_match(flag) {
         return CommandResponse::error(
-            "Invalid flag format. Flags should be in format: FLAG{something}".to_string()
+            "Invalid format. Use: flag <port_number> or flag FLAG{...}".to_string()
         );
     }
 

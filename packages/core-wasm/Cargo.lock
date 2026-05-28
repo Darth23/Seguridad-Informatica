@@ -160,6 +160,7 @@ dependencies = [
  "time",
  "wasm-bindgen",
  "wasm-bindgen-test",
+ "web-sys",
 ]
 
 [[package]]
@@ -900,6 +901,16 @@ name = "wasm-bindgen-test-shared"
 version = "0.2.122"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "684365b586a9a6256c1cc3544eee8680de48d6041142f581776ec7b139622ae9"
+
+[[package]]
+name = "web-sys"
+version = "0.3.99"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d621441cfc37b84979402712047321980c178f299193a3589d05b99e8763436"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
+]
 
 [[package]]
 name = "winapi-util"

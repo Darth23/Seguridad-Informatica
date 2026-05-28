@@ -10,6 +10,7 @@ pub mod flag_validator;
 pub mod rate_limiter;
 pub mod boss_simulator;
 pub mod analytics_engine;
+pub mod challenge;
 
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
@@ -120,6 +121,24 @@ pub fn get_version() -> String {
 #[wasm_bindgen]
 pub fn health_check() -> bool {
     true
+}
+
+/// Initialize the procedural lab challenge with a seed from JavaScript
+/// Call: init_procedural_lab(Date.now())
+#[wasm_bindgen]
+pub fn init_procedural_lab(seed: u32) {
+    challenge::init_procedural_lab_impl(seed);
+}
+
+/// Get current challenge status as JSON
+#[wasm_bindgen]
+pub fn get_challenge_status() -> String {
+    let status = serde_json::json!({
+        "initialized": challenge::is_initialized(),
+        "target_ip": challenge::get_target_ip(),
+        "backdoor_port": challenge::get_backdoor_port(),
+    });
+    status.to_string()
 }
 
 #[cfg(test)]

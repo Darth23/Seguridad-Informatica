@@ -17,6 +17,8 @@ interface CoreWasmModule {
   process_command(command: string, args: string): string;
   get_version(): string;
   health_check(): boolean;
+  init_procedural_lab(seed: number): void;
+  get_challenge_status(): string;
   
   // Network functions
   scan_host(args: string): string;
@@ -67,6 +69,11 @@ export async function loadWasmModule(): Promise<CoreWasmModule> {
       
       // Initialize the WASM module
       await wasm.default();
+      
+      // Seed the procedural lab challenge with current timestamp
+      const seed = Date.now() % 4294967295; // Ensure it fits in u32
+      wasm.init_procedural_lab(seed);
+      console.log('[WASM] Procedural lab seeded with:', seed);
       
       wasmModule = wasm;
       console.log('[WASM] Module loaded successfully, version:', wasm.get_version());

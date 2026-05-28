@@ -54,13 +54,13 @@ export const LESSON_0_2 = `
 <h2 style="color:#fff;font-size:1.25rem;font-weight:600;margin-top:1.5rem;margin-bottom:0.75rem">Reto Practico</h2>
 <p style="color:#cbd5e1;line-height:1.7;margin-bottom:0.75rem"><strong style="color:#fff">Objetivo:</strong> Escanea la red virtual y encuentra el servicio oculto.</p>
 <ol style="color:#cbd5e1;line-height:1.8;margin-bottom:1rem;padding-left:1.5rem">
-  <li>Ejecuta <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#7ee787;font-size:0.875rem">scan_network</code> para descubrir todos los hosts disponibles</li>
-  <li>Usa <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#7ee787;font-size:0.875rem">nmap 10.0.2.15</code> para escanear el host objetivo</li>
-  <li>Identifica el puerto inusual que esta abierto</li>
-  <li>Envia la FLAG con <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#7ee787;font-size:0.875rem">flag</code> para completar el reto</li>
+  <li>Ejecuta <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#7ee787;font-size:0.875rem">scan_network</code> para descubrir todos los hosts en tu segmento</li>
+  <li>Usa <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#7ee787;font-size:0.875rem">nmap</code> sobre cada IP en el rango <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#7ee787;font-size:0.875rem">10.0.2.x</code> para encontrar la que tiene un puerto anomalo</li>
+  <li>Identifica el puerto inusual que aparece como <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#f59e0b;font-size:0.875rem">unknown-backdoor</code></li>
+  <li>Envia el numero del puerto con <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#7ee787;font-size:0.875rem">flag &lt;puerto&gt;</code> para completar el reto</li>
 </ol>
 <div style="background:rgba(6,78,59,0.2);border:1px solid #065f46;padding:1rem;border-radius:8px;margin:1.5rem 0">
-  <p style="color:#6ee7b7;line-height:1.7;margin:0"><strong>FLAG&#123;network_scanning_master&#125;</strong> se encuentra en el servicio oculto del host 10.0.2.15.</p>
+  <p style="color:#6ee7b7;line-height:1.7;margin:0"><strong>Reto dinamico:</strong> El IP objetivo y el puerto backdoor se generan proceduralmente en cada sesion. Usa <code style="background:#1e293b;padding:2px 6px;border-radius:4px;color:#7ee787;font-size:0.875rem">nmap</code> para descubrir que IP esta activa en 10.0.2.0/24 y que puerto anomalo tiene abierto.</p>
 </div>
 <p style="color:#cbd5e1;line-height:1.7;margin-top:1rem">Usa la terminal de la derecha para completar el reto.</p>
 `;

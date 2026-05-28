@@ -3,7 +3,10 @@ declare module '@cyber-edu/core-wasm' {
   export function process_command(command: string, args: string): string;
   export function get_version(): string;
   export function health_check(): boolean;
+  export function init_procedural_lab(seed: number): void;
+  export function get_challenge_status(): string;
   export function scan_host(args: string): string;
+  export function scan_network(args: string): string;
   export function ping_host(args: string): string;
   export function http_get(args: string): string;
   export function hash_data(args: string): string;
@@ -20,5 +23,16 @@ declare module '@cyber-edu/core-wasm' {
   export function check_flag(args: string): string;
   export function check_rate(args: string): string;
   export function reset_rate(args: string): string;
+  export function boss_get_state(): string;
+  export function boss_start(): string;
+  export function boss_deal_damage(args: string): string;
+  export function boss_expose_vulnerability(args: string): string;
+  export function boss_add_defense(args: string): string;
+  export function boss_reset(): string;
+  export function get_honey_alerts(): string;
+  export function get_flag_hints(): string;
+  export function analytics_skill_breakdown(args: string): string;
+  export function analytics_calculate_streaks(args: string): string;
+  export function analytics_time_metrics(args: string): string;
   export default function init(): Promise<void>;
 }
