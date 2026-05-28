@@ -1,7 +1,5 @@
 'use client';
 
-declare module '*.css';
-
 import React, { useState, useCallback, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
@@ -201,13 +199,13 @@ function parseCustomSyntax(content: string): string {
   return processed;
 }
 
-export function MarkdownReader({ content, onFlagSubmit }: MarkdownReaderProps) {
+export function MarkdownReader({ content, onFlagSubmit: _onFlagSubmit }: MarkdownReaderProps) {
   const processedContent = parseCustomSyntax(content);
 
   // Custom components for react-markdown
   const components = {
     // Override code blocks
-    code: ({ node, inline, className, children, ...props }: any) => {
+    code: ({ inline, className, children, ...props }: any) => {
       const match = /language-(\w+)/.exec(className || '');
       const language = match ? match[1] : '';
       const code = String(children).replace(/\n$/, '');
@@ -229,41 +227,41 @@ export function MarkdownReader({ content, onFlagSubmit }: MarkdownReaderProps) {
     ),
 
     // Custom callout component
-    callout: ({ node, type, children }: any) => (
+    callout: ({ type, children }: any) => (
       <Callout type={type as 'info' | 'warning' | 'tip' | 'danger'}>
         {children}
       </Callout>
     ),
 
     // Enhanced headings with anchor links
-    h1: ({ node, ...props }: any) => (
+    h1: ({ ...props }: any) => (
       <h1 className="text-3xl font-bold text-white mt-8 mb-4 pb-2 border-b border-gray-700" {...props} />
     ),
-    h2: ({ node, ...props }: any) => (
+    h2: ({ ...props }: any) => (
       <h2 className="text-2xl font-bold text-white mt-6 mb-3" {...props} />
     ),
-    h3: ({ node, ...props }: any) => (
+    h3: ({ ...props }: any) => (
       <h3 className="text-xl font-semibold text-white mt-4 mb-2" {...props} />
     ),
 
     // Styled paragraphs
-    p: ({ node, ...props }: any) => (
+    p: ({ ...props }: any) => (
       <p className="text-gray-300 leading-relaxed my-3" {...props} />
     ),
 
     // Lists
-    ul: ({ node, ...props }: any) => (
+    ul: ({ ...props }: any) => (
       <ul className="list-disc list-inside space-y-1 my-3 text-gray-300" {...props} />
     ),
-    ol: ({ node, ...props }: any) => (
+    ol: ({ ...props }: any) => (
       <ol className="list-decimal list-inside space-y-1 my-3 text-gray-300" {...props} />
     ),
-    li: ({ node, ...props }: any) => (
+    li: ({ ...props }: any) => (
       <li className="pl-1" {...props} />
     ),
 
     // Links
-    a: ({ node, ...props }: any) => (
+    a: ({ ...props }: any) => (
       <a
         className="text-blue-400 hover:text-blue-300 underline decoration-blue-500/50 hover:decoration-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400 rounded"
         target="_blank"
@@ -273,7 +271,7 @@ export function MarkdownReader({ content, onFlagSubmit }: MarkdownReaderProps) {
     ),
 
     // Blockquotes
-    blockquote: ({ node, ...props }: any) => (
+    blockquote: ({ ...props }: any) => (
       <blockquote
         className="border-l-4 border-gray-600 pl-4 py-2 my-4 text-gray-400 italic bg-gray-800/30 rounded-r"
         {...props}
@@ -281,15 +279,15 @@ export function MarkdownReader({ content, onFlagSubmit }: MarkdownReaderProps) {
     ),
 
     // Tables
-    table: ({ node, ...props }: any) => (
+    table: ({ ...props }: any) => (
       <div className="overflow-x-auto my-4">
         <table className="min-w-full border-collapse" {...props} />
       </div>
     ),
-    th: ({ node, ...props }: any) => (
+    th: ({ ...props }: any) => (
       <th className="px-4 py-2 bg-gray-800 border border-gray-700 text-left text-sm font-semibold text-white" {...props} />
     ),
-    td: ({ node, ...props }: any) => (
+    td: ({ ...props }: any) => (
       <td className="px-4 py-2 border border-gray-700 text-sm text-gray-300" {...props} />
     ),
   };

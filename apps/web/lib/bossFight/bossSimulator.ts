@@ -4,7 +4,7 @@
  * Gestiona la máquina de estados del boss (health, phases, defenses, vulnerabilities)
  */
 
-import type { WasmModule } from '../wasm/types';
+import type { CommandResponse } from '../wasm/types';
 
 export interface BossState {
   health: number;
@@ -30,13 +30,11 @@ export interface BossEvent {
 }
 
 class BossSimulatorBridge {
-  private wasmModule: WasmModule | null = null;
   private state: BossState | null = null;
   private eventListeners: Map<string, Set<(event: BossEvent) => void>> = new Map();
   private simulationInterval: number | null = null;
 
-  async initialize(wasmModule: WasmModule): Promise<void> {
-    this.wasmModule = wasmModule;
+  async initialize(_wasmMod: CommandResponse): Promise<void> {
     this.state = {
       health: 1000,
       maxHealth: 1000,

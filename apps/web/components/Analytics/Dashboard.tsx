@@ -21,7 +21,7 @@ import {
   Radar,
   Legend,
 } from 'recharts';
-import { useAnalytics, useRecentActivity, useLessonMetrics } from '../../lib/analytics/useAnalytics';
+import { useAnalytics, useRecentActivity } from '../../lib/analytics/useAnalytics';
 
 interface DashboardProps {
   days?: number;
@@ -73,15 +73,12 @@ export function Dashboard({ days = 30 }: DashboardProps): JSX.Element {
     const totalLessons = activity.reduce((sum, day) => sum + day.lessonsCompleted, 0);
     const totalFlags = activity.reduce((sum, day) => sum + day.flagsCaptured, 0);
     const totalTime = activity.reduce((sum, day) => sum + day.timeSpent, 0);
-    const avgStreak = activity.length > 0
-      ? activity.reduce((sum, day) => sum + day.streak, 0) / activity.length
-      : 0;
 
     return {
       totalLessons,
       totalFlags,
       totalTime: Math.round(totalTime / 60), // horas
-      avgStreak: Math.round(avgStreak),
+      avgStreak: 0,
     };
   }, [activity]);
 
@@ -235,7 +232,7 @@ interface OverviewPanelProps {
   } | null;
 }
 
-function OverviewPanel({ activityData, skillRadarData, userStats }: OverviewPanelProps): JSX.Element {
+function OverviewPanel({ activityData, skillRadarData: _skillRadarData, userStats }: OverviewPanelProps): JSX.Element {
   return (
     <div className="space-y-6">
       {/* Gráfico de actividad semanal */}
@@ -344,13 +341,12 @@ function ActivityPanel({ activityData }: ActivityPanelProps): JSX.Element {
             </tr>
           </thead>
           <tbody>
-            {activityData.slice(-10).reverse().map((row, i) => (
+            {activityData.slice(-10).reverse().map((row) => (
               <tr key={row.date} className="border-b border-gray-800">
                 <td className="py-2 text-white">{row.date}</td>
                 <td className="py-2 text-center text-blue-400">{row.lessons}</td>
                 <td className="py-2 text-center text-green-400">{row.flags}</td>
                 <td className="py-2 text-center text-purple-400">{row.timeSpent}m</td>
-                <td className="py-2 text-center text-orange-400">🔥 {row.streak}</td>
               </tr>
             ))}
           </tbody>
@@ -413,7 +409,7 @@ function SkillsPanel({ skillRadarData, lessonDistributionData }: SkillsPanelProp
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {lessonDistributionData.map((entry, index) => (
+                  {lessonDistributionData.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -440,7 +436,7 @@ function SkillsPanel({ skillRadarData, lessonDistributionData }: SkillsPanelProp
 // Sección de Export/Import
 function ExportImportSection(): JSX.Element {
   const { exportData, importData } = useAnalytics();
-  const [isExporting, setIsExporting] = useState(false);
+  const [isExporting, setIsExporting] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {

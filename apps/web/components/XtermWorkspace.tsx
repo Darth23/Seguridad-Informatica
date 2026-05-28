@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { Terminal } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import 'xterm/css/xterm.css';
+import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
+import { Terminal } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
+import '@xterm/xterm/css/xterm.css';
 import { useUIStore, useTerminalStore } from '@/lib/stores/uiStore';
 import { XtermA11yWrapper } from './XtermA11yWrapper';
 import { processCommand } from '@/lib/wasm';
@@ -14,21 +14,25 @@ interface XtermWorkspaceProps {
   initialCommands?: string[];
 }
 
-export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: XtermWorkspaceProps) {
+export function XtermWorkspace({ onCommandExecute: _onCommandExecute, initialCommands = [] }: XtermWorkspaceProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const initializedRef = useRef(false);
   
+  const stableInitialCommands = useMemo(() => initialCommands, []);
+
   const { addTerminalLine, terminalHistory, clearTerminal } = useUIStore();
-  const { isReady, setIsReady, commandHistory, addCommand, navigateHistory, clearHistory } = useTerminalStore();
+  const { isReady, setIsReady, commandHistory: _commandHistory, addCommand, navigateHistory, clearHistory: _clearHistory } = useTerminalStore();
   
   const [currentInput, setCurrentInput] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
   // Initialize terminal
   useEffect(() => {
-    if (!terminalRef.current || xtermRef.current) return;
+    if (!terminalRef.current || initializedRef.current) return;
+    initializedRef.current = true;
 
     const term = new Terminal({
       convertEol: true,
@@ -39,7 +43,7 @@ export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: Xterm
         foreground: '#c9d1d9',
         cursor: '#58a6ff',
         cursorAccent: '#0d1117',
-        selection: 'rgba(88, 166, 255, 0.3)',
+        selectionBackground: 'rgba(88, 166, 255, 0.3)',
         black: '#0d1117',
         red: '#ff7b72',
         green: '#7ee787',
@@ -67,41 +71,64 @@ export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: Xterm
     term.loadAddon(fitAddon);
     
     term.open(terminalRef.current);
-    fitAddon.fit();
 
     xtermRef.current = term;
     fitAddonRef.current = fitAddon;
 
-    // Welcome message
-    term.writeln('\x1b[1;34m╔══════════════════════════════════════════════════════╗\x1b[0m');
-    term.writeln('\x1b[1;34m║\x1b[0m  \x1b[1;33mCyberEdu Terminal\x1b[0m                                    \x1b[1;34m║\x1b[0m');
-    term.writeln('\x1b[1;34m║\x1b[0m  Entorno seguro de aprendizaje                  \x1b[1;34m║\x1b[0m');
-    term.writeln('\x1b[1;34m╚══════════════════════════════════════════════════════╝\x1b[0m');
-    term.writeln('');
-    term.writeln('Escribe \x1b[1;32mhelp\x1b[0m para ver los comandos disponibles.');
-    term.writeln('');
-    term.writeln('\x1b[1;35m[WA SM]\x1b[0m Core engine loaded and ready.');
-    term.writeln('');
+    let initialized = false;
+    const doInit = () => {
+      if (initialized) return;
+      initialized = true;
 
-    // Execute initial commands
-    initialCommands.forEach((cmd) => {
-      term.writeln(`\x1b[32muser@cyberedu\x1b[0m:\x1b[34m~\x1b[0m$ ${cmd}`);
+      try {
+        fitAddon.fit();
+      } catch { /* ignore */ }
+
+      term.writeln('\x1b[1;34m╔══════════════════════════════════════════════════════╗\x1b[0m');
+      term.writeln('\x1b[1;34m║\x1b[0m  \x1b[1;33mCyberEdu Terminal\x1b[0m                                    \x1b[1;34m║\x1b[0m');
+      term.writeln('\x1b[1;34m║\x1b[0m  Entorno seguro de aprendizaje                  \x1b[1;34m║\x1b[0m');
+      term.writeln('\x1b[1;34m╚══════════════════════════════════════════════════════╝\x1b[0m');
+      term.writeln('');
+      term.writeln('Escribe \x1b[1;32mhelp\x1b[0m para ver los comandos disponibles.');
+      term.writeln('');
+      term.writeln('\x1b[1;35m[WA SM]\x1b[0m Core engine loaded and ready.');
+      term.writeln('');
+
+      stableInitialCommands.forEach((cmd) => {
+        term.writeln(`\x1b[32muser@cyberedu\x1b[0m:\x1b[34m~\x1b[0m$ ${cmd}`);
+      });
+
+      setIsReady(true);
+    };
+
+    // Wait for the renderer to be ready before writing
+    const unsubscribe = term.onRender(() => {
+      unsubscribe.dispose();
+      setTimeout(doInit, 100);
     });
 
-    setIsReady(true);
+    // Fallback: init after timeout if onRender never fires
+    const fallbackTimer = setTimeout(doInit, 500);
 
     // Handle resize
-    const handleResize = () => fitAddon.fit();
+    const handleResize = () => {
+      if (terminalRef.current && terminalRef.current.clientHeight > 0) {
+        fitAddon.fit();
+      }
+    };
     window.addEventListener('resize', handleResize);
 
     return () => {
+      clearTimeout(fallbackTimer);
+      unsubscribe.dispose();
       window.removeEventListener('resize', handleResize);
       term.dispose();
       xtermRef.current = null;
       fitAddonRef.current = null;
+      initializedRef.current = false;
       setIsReady(false);
     };
-  }, [setIsReady, initialCommands]);
+  }, []);
 
   // Focus trap - keep focus on terminal when active
   useEffect(() => {
@@ -109,17 +136,36 @@ export function XtermWorkspace({ onCommandExecute, initialCommands = [] }: Xterm
 
     const term = xtermRef.current;
     
-    const handleFocus = () => setIsFocused(true);
-    const handleBlur = () => setIsFocused(false);
-
-    term.onFocus(handleFocus);
-    term.onBlur(handleBlur);
+    const onDataDisposable = term.onData(() => {});
+    const onBinaryDisposable = term.onBinary(() => {});
 
     return () => {
-      term.off('focus', handleFocus);
-      term.off('blur', handleBlur);
+      onDataDisposable.dispose();
+      onBinaryDisposable.dispose();
     };
   }, [isFocused]);
+
+  // Track terminal focus state
+  useEffect(() => {
+    if (!xtermRef.current) return;
+    const term = xtermRef.current;
+    
+    const focusHandler = () => setIsFocused(true);
+    const blurHandler = () => setIsFocused(false);
+    
+    const element = term.element;
+    if (element) {
+      element.addEventListener('focus', focusHandler);
+      element.addEventListener('blur', blurHandler);
+    }
+
+    return () => {
+      if (element) {
+        element.removeEventListener('focus', focusHandler);
+        element.removeEventListener('blur', blurHandler);
+      }
+    };
+  }, []);
 
   // Handle keyboard input
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {

@@ -4,7 +4,6 @@
  */
 
 import jsPDF from 'jspdf';
-import type { UserState } from '@cyber-edu/types';
 
 export interface CertificateData {
   userId: string;

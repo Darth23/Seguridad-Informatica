@@ -4,7 +4,6 @@
 use wasm_bindgen::prelude::*;
 use crate::CommandResponse;
 use regex::Regex;
-use serde_json::json;
 
 /// Analyze log content
 #[wasm_bindgen]
@@ -13,7 +12,7 @@ pub fn analyze(args: &str) -> String {
     serialize_response(&response)
 }
 
-fn analyze_impl(log_content: &str) -> CommandResponse {
+pub fn analyze_impl(log_content: &str) -> CommandResponse {
     if log_content.is_empty() {
         return CommandResponse::error("Log content is required. Usage: analyze_log <log_content>".to_string());
     }
@@ -75,7 +74,50 @@ pub fn search(args: &str) -> String {
     serialize_response(&response)
 }
 
-fn search_impl(args: &str) -> CommandResponse {
+/// Detect potentially dangerous regex patterns (ReDoS)
+fn is_redos_prone(pattern: &str) -> bool {
+    // Heuristic: detect nested quantifiers like (a+)+, (a*)*, (a+)*, etc.
+    let dangerous = [
+        r"\+\)", r"\*\)", r"\+\+", r"\*\+",
+        r"\+\{", r"\*\{",
+    ];
+    for d in &dangerous {
+        if pattern.contains(d) {
+            return true;
+        }
+    }
+    // Detect nested groups with quantifiers
+    let mut depth = 0;
+    let mut has_quantifier_after_close = false;
+    for ch in pattern.chars() {
+        match ch {
+            '(' => { depth += 1; has_quantifier_after_close = false; }
+            ')' => { has_quantifier_after_close = true; }
+            '+' | '*' | '{' if has_quantifier_after_close && depth > 0 => {
+                return true;
+            }
+            _ => { has_quantifier_after_close = false; }
+        }
+    }
+    false
+}
+
+/// Safe regex compilation with timeout heuristic
+fn safe_regex(pattern_str: &str) -> Result<Regex, String> {
+    if is_redos_prone(pattern_str) {
+        return Err(format!(
+            "Pattern '{}' may cause catastrophic backtracking (ReDoS). Simplify the pattern.",
+            pattern_str
+        ));
+    }
+    // Limit pattern complexity
+    if pattern_str.len() > 512 {
+        return Err("Pattern too long (max 512 characters)".to_string());
+    }
+    Regex::new(pattern_str).map_err(|e| format!("Invalid regex: {}", e))
+}
+
+pub fn search_impl(args: &str) -> CommandResponse {
     if args.is_empty() {
         return CommandResponse::error("Usage: search_log <pattern>:<log_content>".to_string());
     }
@@ -88,9 +130,11 @@ fn search_impl(args: &str) -> CommandResponse {
     let pattern_str = parts[0];
     let log_content = parts[1];
 
-    // Compile regex pattern
-    let regex = Regex::new(pattern_str)
-        .map_err(|e| format!("Invalid regex pattern: {}", e))?;
+    // Compile regex pattern safely
+    let regex = match safe_regex(pattern_str) {
+        Ok(r) => r,
+        Err(e) => return CommandResponse::error(e),
+    };
 
     // Find all matches
     let lines: Vec<&str> = log_content.lines().collect();

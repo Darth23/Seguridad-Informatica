@@ -2,13 +2,12 @@
 //! Provides cryptographic functionality: hashing, encryption, decryption, key generation
 
 use wasm_bindgen::prelude::*;
-use crate::{CommandResponse, WasmResult};
+use crate::CommandResponse;
 use sha2::{Sha256, Sha512, Digest};
 use aes_gcm::{Aes256Gcm, KeyInit, Nonce};
 use aes_gcm::aead::Aead;
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use rand::RngCore;
-use serde_json::json;
 
 /// Hash data using specified algorithm
 #[wasm_bindgen]
@@ -17,7 +16,7 @@ pub fn hash_data(args: &str) -> String {
     serialize_response(&response)
 }
 
-fn hash_data_impl(args: &str) -> CommandResponse {
+pub fn hash_data_impl(args: &str) -> CommandResponse {
     if args.is_empty() {
         return CommandResponse::error("Usage: hash <algorithm>:<data>".to_string());
     }
@@ -56,7 +55,7 @@ pub fn encrypt_data(args: &str) -> String {
     serialize_response(&response)
 }
 
-fn encrypt_data_impl(args: &str) -> CommandResponse {
+pub fn encrypt_data_impl(args: &str) -> CommandResponse {
     if args.is_empty() {
         return CommandResponse::error("Usage: encrypt <key>:<data>".to_string());
     }
@@ -81,12 +80,16 @@ fn encrypt_data_impl(args: &str) -> CommandResponse {
     let nonce = Nonce::from_slice(&nonce_bytes);
 
     // Create cipher
-    let cipher = Aes256Gcm::new_from_slice(&key_bytes)
-        .map_err(|e| format!("Key error: {}", e))?;
+    let cipher = match Aes256Gcm::new_from_slice(&key_bytes) {
+        Ok(c) => c,
+        Err(e) => return CommandResponse::error(format!("Key error: {}", e)),
+    };
 
     // Encrypt
-    let ciphertext = cipher.encrypt(nonce, data.as_bytes())
-        .map_err(|e| format!("Encryption error: {}", e))?;
+    let ciphertext = match cipher.encrypt(nonce, data.as_bytes()) {
+        Ok(c) => c,
+        Err(e) => return CommandResponse::error(format!("Encryption error: {}", e)),
+    };
 
     // Combine nonce and ciphertext, then base64 encode
     let mut combined = nonce_bytes.to_vec();
@@ -103,7 +106,7 @@ pub fn decrypt_data(args: &str) -> String {
     serialize_response(&response)
 }
 
-fn decrypt_data_impl(args: &str) -> CommandResponse {
+pub fn decrypt_data_impl(args: &str) -> CommandResponse {
     if args.is_empty() {
         return CommandResponse::error("Usage: decrypt <key>:<encrypted_data>".to_string());
     }
@@ -117,8 +120,10 @@ fn decrypt_data_impl(args: &str) -> CommandResponse {
     let encrypted_b64 = parts[1];
 
     // Decode base64
-    let decoded = BASE64.decode(encrypted_b64)
-        .map_err(|e| format!("Base64 decode error: {}", e))?;
+    let decoded = match BASE64.decode(encrypted_b64) {
+        Ok(d) => d,
+        Err(e) => return CommandResponse::error(format!("Base64 decode error: {}", e)),
+    };
 
     if decoded.len() < 12 {
         return CommandResponse::error("Invalid encrypted data format".to_string());
@@ -135,13 +140,17 @@ fn decrypt_data_impl(args: &str) -> CommandResponse {
     key_bytes[..len].copy_from_slice(&key_input[..len]);
 
     // Create cipher
-    let cipher = Aes256Gcm::new_from_slice(&key_bytes)
-        .map_err(|e| format!("Key error: {}", e))?;
+    let cipher = match Aes256Gcm::new_from_slice(&key_bytes) {
+        Ok(c) => c,
+        Err(e) => return CommandResponse::error(format!("Key error: {}", e)),
+    };
 
     // Decrypt
     let nonce = Nonce::from_slice(nonce_bytes);
-    let plaintext = cipher.decrypt(nonce, ciphertext)
-        .map_err(|e| format!("Decryption error: {}", e))?;
+    let plaintext = match cipher.decrypt(nonce, ciphertext) {
+        Ok(p) => p,
+        Err(e) => return CommandResponse::error(format!("Decryption error: {}", e)),
+    };
 
     let decrypted_text = String::from_utf8_lossy(&plaintext).to_string();
     CommandResponse::success(format!("Decrypted: {}", decrypted_text))
@@ -154,7 +163,7 @@ pub fn generate_key(args: &str) -> String {
     serialize_response(&response)
 }
 
-fn generate_key_impl(args: &str) -> CommandResponse {
+pub fn generate_key_impl(args: &str) -> CommandResponse {
     let size = if args.is_empty() {
         32
     } else {
@@ -174,22 +183,6 @@ fn serialize_response(response: &CommandResponse) -> String {
         serde_json::to_string(&CommandResponse::error(format!("Serialization error: {}", e)))
             .unwrap()
     })
-}
-
-// Helper trait implementation for Result conversion
-trait MapWasmError<T> {
-    fn map_wasm_error<F>(self, f: F) -> Result<T, CommandResponse>
-    where
-        F: FnOnce(String) -> String;
-}
-
-impl<T> MapWasmError<T> for Result<T, String> {
-    fn map_wasm_error<F>(self, f: F) -> Result<T, CommandResponse>
-    where
-        F: FnOnce(String) -> String,
-    {
-        self.map_err(|e| CommandResponse::error(f(e)))
-    }
 }
 
 #[cfg(test)]

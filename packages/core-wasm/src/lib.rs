@@ -61,33 +61,35 @@ pub fn process_command(command: &str, args: &str) -> String {
 fn execute_command(command: &str, args: &str) -> CommandResponse {
     match command {
         // Network commands
-        "nmap" => network::scan_host(args),
-        "ping" => network::ping_host(args),
-        "http_get" => network::http_get(args),
+        "nmap" => network::scan_host_impl(args),
+        "scan_network" => network::scan_network_impl(),
+        "ping" => network::ping_host_impl(args),
+        "http_get" => network::http_get_impl(args),
         
         // Crypto commands
-        "hash" => crypto::hash_data(args),
-        "encrypt" => crypto::encrypt_data(args),
-        "decrypt" => crypto::decrypt_data(args),
-        "generate_key" => crypto::generate_key(args),
+        "hash" => crypto::hash_data_impl(args),
+        "encrypt" => crypto::encrypt_data_impl(args),
+        "decrypt" => crypto::decrypt_data_impl(args),
+        "generate_key" => crypto::generate_key_impl(args),
         
         // Log analysis commands
-        "analyze_log" => log_analyzer::analyze(args),
-        "search_log" => log_analyzer::search(args),
+        "analyze_log" => log_analyzer::analyze_impl(args),
+        "search_log" => log_analyzer::search_impl(args),
         
         // Filesystem commands
-        "ls" => filesystem::list_directory(args),
-        "cat" => filesystem::read_file(args),
-        "mkdir" => filesystem::create_directory(args),
-        "touch" => filesystem::create_file(args),
+        "ls" => filesystem::list_directory_impl(args),
+        "cat" => filesystem::read_file_impl(args),
+        "mkdir" => filesystem::create_directory_impl(args),
+        "touch" => filesystem::create_file_impl(args),
         
         // Flag validation commands
-        "flag" => flag_validator::submit_flag(args),
-        "check_flag" => flag_validator::check_flag(args),
+        "flag" => flag_validator::submit_flag_impl(args),
+        "check_flag" => flag_validator::check_flag_impl(args),
+        "honey_alerts" => flag_validator::get_honey_alerts_impl(),
         
         // Rate limiter commands
-        "rate_check" => rate_limiter::check_rate(args),
-        "rate_reset" => rate_limiter::reset_rate(args),
+        "rate_check" => rate_limiter::check_rate_impl(args),
+        "rate_reset" => rate_limiter::reset_rate_impl(args),
         
         _ => CommandResponse::error(format!("Unknown command: {}", command)),
     }

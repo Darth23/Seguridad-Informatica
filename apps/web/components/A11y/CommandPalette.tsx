@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAccessibility } from '../../lib/a11y/AccessibilityProvider';
-import { useKeyboardShortcuts, type KeyboardShortcut } from '../../lib/a11y/useKeyboardShortcuts';
+import { useKeyboardShortcuts } from '../../lib/a11y/useKeyboardShortcuts';
 
 interface CommandPaletteProps {
   commands?: Array<{
@@ -28,7 +28,7 @@ export function CommandPalette({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  const { announce, reducedMotion } = useAccessibility();
+  const { announce } = useAccessibility();
 
   const isOpen = controlledIsOpen ?? internalIsOpen;
   const setIsOpen = controlledIsOpen !== undefined ? onClose : setInternalIsOpen;
@@ -216,7 +216,7 @@ export function CommandPalette({
                 <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   {category}
                 </div>
-                {cmds.map((cmd, index) => {
+                {cmds.map((cmd) => {
                   const globalIndex = filteredCommands.indexOf(cmd);
                   const isSelected = globalIndex === selectedIndex;
 

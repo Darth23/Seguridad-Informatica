@@ -1,9 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Sidebar } from "./Sidebar";
 import { MarkdownReader } from "./MarkdownReader";
-import { XtermWorkspace } from "./XtermWorkspace";
+
+const XtermWorkspace = dynamic(() => import("./XtermWorkspace").then(m => m.XtermWorkspace), { ssr: false });
 
 export default function AppLayout() {
   const roadmapData: any = [];

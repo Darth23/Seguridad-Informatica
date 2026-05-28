@@ -4,7 +4,6 @@
 use wasm_bindgen::prelude::*;
 use crate::CommandResponse;
 use std::collections::HashMap;
-use serde_json::json;
 
 // Simulated rate limiter state
 // In production, this would be backed by a proper storage mechanism
@@ -109,7 +108,7 @@ pub fn check_rate(args: &str) -> String {
     serialize_response(&response)
 }
 
-fn check_rate_impl(args: &str) -> CommandResponse {
+pub fn check_rate_impl(args: &str) -> CommandResponse {
     if args.is_empty() {
         return CommandResponse::error("Usage: rate_check <operation>:<client_id>".to_string());
     }
@@ -125,7 +124,12 @@ fn check_rate_impl(args: &str) -> CommandResponse {
     let limiter = get_rate_limiter();
     let (current, limit) = limiter.get_usage(operation, client_id);
 
-    if limiter.check_rate(operation, client_id)? {
+    let allowed = match limiter.check_rate(operation, client_id) {
+        Ok(a) => a,
+        Err(e) => return CommandResponse::error(format!("Rate check error: {}", e)),
+    };
+
+    if allowed {
         CommandResponse::success(format!(
             "\x1b[32m✓ Request allowed\x1b[0m\n\
              Operation: {}\n\
@@ -151,7 +155,7 @@ pub fn reset_rate(args: &str) -> String {
     serialize_response(&response)
 }
 
-fn reset_rate_impl(args: &str) -> CommandResponse {
+pub fn reset_rate_impl(args: &str) -> CommandResponse {
     if args.is_empty() {
         return CommandResponse::error("Usage: rate_reset <operation>:<client_id>".to_string());
     }
@@ -214,22 +218,6 @@ fn serialize_response(response: &CommandResponse) -> String {
         serde_json::to_string(&CommandResponse::error(format!("Serialization error: {}", e)))
             .unwrap()
     })
-}
-
-// Helper trait implementation for Result conversion
-trait MapWasmError<T> {
-    fn map_wasm_error<F>(self, f: F) -> Result<T, CommandResponse>
-    where
-        F: FnOnce(String) -> String;
-}
-
-impl<T> MapWasmError<T> for Result<T, String> {
-    fn map_wasm_error<F>(self, f: F) -> Result<T, CommandResponse>
-    where
-        F: FnOnce(String) -> String,
-    {
-        self.map_err(|e| CommandResponse::error(f(e)))
-    }
 }
 
 #[cfg(test)]

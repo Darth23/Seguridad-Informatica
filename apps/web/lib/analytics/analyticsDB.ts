@@ -115,6 +115,12 @@ export async function trackEvent(
     timestamp: Date.now(),
     lessonId,
     data,
+  } as {
+    id: number;
+    type: string;
+    timestamp: number;
+    lessonId?: string;
+    data: Record<string, unknown>;
   });
 
   // Actualizar estadísticas si es relevante

@@ -15,7 +15,6 @@ export function BossHUD({ onAttack, onExploit }: BossHUDProps): JSX.Element {
   const [showDamageIndicator, setShowDamageIndicator] = useState(false);
   
   const {
-    timeElapsed,
     isRunning,
     phase,
     start,
@@ -25,7 +24,7 @@ export function BossHUD({ onAttack, onExploit }: BossHUDProps): JSX.Element {
     announcement,
   } = useBossTimer({
     autoStart: false,
-    onPhaseChange: (newPhase) => {
+    onPhaseChange: (_newPhase) => {
       // Actualizar estado cuando cambia la fase
       const state = bossSimulator.getState();
       if (state) setBossState({ ...state });
@@ -86,6 +85,8 @@ export function BossHUD({ onAttack, onExploit }: BossHUDProps): JSX.Element {
     const state = bossSimulator.getState();
     if (state) setBossState(state);
   }, [bossState, onExploit]);
+
+  void handleExploit;
 
   const getHealthPercentage = (): number => {
     if (!bossState) return 100;

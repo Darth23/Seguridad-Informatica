@@ -9,12 +9,12 @@ license = "MIT"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-wasm-bindgen = "0.2.92"
-js-sys = "0.3.69"
+wasm-bindgen = "0.2.100"
+js-sys = "0.3.77"
 console_error_panic_hook = "0.1.7"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4.3"
-base64 = "0.21.7"
+base64 = "0.22.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10.8"
@@ -22,13 +22,16 @@ aes = "0.8.4"
 aes-gcm = "0.10.3"
 rsa = "0.9.6"
 rand = "0.8.5"
-regex = "1.10.4"
+regex = "1.11.1"
 pbkdf2 = "0.12.2"
 hmac = "0.12.1"
 time = "0.3.36"
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.42"
+wasm-bindgen-test = "0.3.50"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
 
 [profile.release]
 opt-level = "z"

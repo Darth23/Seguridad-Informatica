@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { LessonNode, UserState } from '@cyber-edu/types';
 
 interface UIState {
   // Panel layout

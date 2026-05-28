@@ -7,13 +7,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   trackEvent,
-  getEvents,
   updateLessonMetrics,
   getLessonMetrics,
-  getAllLessonMetrics,
-  updateDailyActivity,
   getRecentActivity,
-  updateUserStats,
   getUserStats,
   exportAnalyticsData,
   importAnalyticsData,

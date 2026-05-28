@@ -3,7 +3,7 @@
  * Gestiona atajos de teclado accesibles con soporte para screen readers
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAccessibility } from './AccessibilityProvider';
 
 export interface KeyboardShortcut {

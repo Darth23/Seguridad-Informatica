@@ -3,7 +3,7 @@
  * Implementa firma digital usando Web Crypto API
  */
 
-import { generateSignature, type CertificateData } from './certificateEngine';
+import { type CertificateData } from './certificateEngine';
 
 export interface SignedCertificate extends CertificateData {
   signature: string;

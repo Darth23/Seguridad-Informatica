@@ -108,7 +108,7 @@ export function XtermA11yWrapper({ children, isReady }: XtermA11yWrapperProps) {
 export function useScreenReaderAnnouncement() {
   const [message, setMessage] = useState('');
 
-  const announce = useCallback((msg: string, priority: 'polite' | 'assertive' = 'polite') => {
+  const announce = useCallback((msg: string, _priority: 'polite' | 'assertive' = 'polite') => {
     setMessage(msg);
     // Clear message after announcement
     setTimeout(() => setMessage(''), 1000);

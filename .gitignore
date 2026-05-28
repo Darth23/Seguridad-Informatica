@@ -28,6 +28,8 @@ venv/
 *.swp
 *.swo
 *.tmp
+*.turbo/cache/
+*.next/
 
 # OS
 .DS_Store
