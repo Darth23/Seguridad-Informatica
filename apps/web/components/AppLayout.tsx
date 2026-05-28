@@ -25,21 +25,38 @@ El sistema de archivos Linux se organiza en una estructura de árbol jerárquica
 
 ### Navegación básica
 
-| Comando | Descripción | Ejemplo |
-|---------|-------------|---------|
-| \`pwd\` | Muestra el directorio actual | \`pwd\` → \`/home/user\` |
-| \`ls -la\` | Lista archivos con detalles y ocultos | \`ls -la /var/log\` |
-| \`cd\` | Cambia de directorio | \`cd /etc\` |
-| \`cat\` | Muestra el contenido de un archivo | \`cat /etc/hostname\` |
+<table class="w-full text-left border-collapse my-4 text-sm">
+  <thead>
+    <tr>
+      <th class="border-b border-slate-700 pb-2 text-emerald-400 font-mono">Comando</th>
+      <th class="border-b border-slate-700 pb-2 text-emerald-400 font-mono">Descripción</th>
+      <th class="border-b border-slate-700 pb-2 text-emerald-400 font-mono">Ejemplo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">pwd</td><td class="py-2 border-b border-slate-800/50 text-slate-300">Muestra el directorio actual</td><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">pwd → /home/user</td></tr>
+    <tr><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">ls -la</td><td class="py-2 border-b border-slate-800/50 text-slate-300">Lista archivos con detalles y ocultos</td><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">ls -la /var/log</td></tr>
+    <tr><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">cd</td><td class="py-2 border-b border-slate-800/50 text-slate-300">Cambia de directorio</td><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">cd /etc</td></tr>
+    <tr><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">cat</td><td class="py-2 border-b border-slate-800/50 text-slate-300">Muestra el contenido de un archivo</td><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">cat /etc/hostname</td></tr>
+  </tbody>
+</table>
 
 ### Atajos de terminal
 
-| Atajo | Acción |
-|-------|--------|
-| \`Tab\` | Autocompleta comandos y rutas |
-| \`Ctrl+C\` | Cancela el comando en ejecución |
-| \`Ctrl+L\` | Limpia la pantalla |
-| \`↑/↓\` | Navega por el historial de comandos |
+<table class="w-full text-left border-collapse my-4 text-sm">
+  <thead>
+    <tr>
+      <th class="border-b border-slate-700 pb-2 text-emerald-400 font-mono">Atajo</th>
+      <th class="border-b border-slate-700 pb-2 text-emerald-400 font-mono">Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">Tab</td><td class="py-2 border-b border-slate-800/50 text-slate-300">Autocompleta comandos y rutas</td></tr>
+    <tr><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">Ctrl+C</td><td class="py-2 border-b border-slate-800/50 text-slate-300">Cancela el comando en ejecución</td></tr>
+    <tr><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">Ctrl+L</td><td class="py-2 border-b border-slate-800/50 text-slate-300">Limpia la pantalla</td></tr>
+    <tr><td class="py-2 border-b border-slate-800/50 text-slate-300 font-mono">↑/↓</td><td class="py-2 border-b border-slate-800/50 text-slate-300">Navega por el historial de comandos</td></tr>
+  </tbody>
+</table>
 
 ---
 
