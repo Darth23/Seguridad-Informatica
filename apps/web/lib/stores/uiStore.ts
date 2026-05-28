@@ -2,6 +2,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface UIState {
+  // Active lesson
+  activeLesson: string;
+  setActiveLesson: (id: string) => void;
+
   // Panel layout
   panelSizes: number[];
   setPanelSizes: (sizes: number[]) => void;
@@ -40,6 +44,10 @@ interface UIState {
 export const useUIStore = create<UIState>()(
   persist(
     (set, get) => ({
+      // Active lesson
+      activeLesson: '0.1',
+      setActiveLesson: (id) => set({ activeLesson: id }),
+
       // Panel layout
       panelSizes: [20, 50, 30],
       setPanelSizes: (sizes) => set({ panelSizes: sizes }),
@@ -93,6 +101,7 @@ export const useUIStore = create<UIState>()(
     {
       name: 'cyber-edu-ui-storage',
       partialize: (state) => ({
+        activeLesson: state.activeLesson,
         expandedNodes: state.expandedNodes,
         highContrast: state.highContrast,
         completedLessons: state.completedLessons,

@@ -40,6 +40,8 @@ impl FilesystemState {
             "{\n  \"theme\": \"dark\",\n  \"language\": \"es\"\n}".to_string());
         files.insert("/home/user/secret.flag".to_string(),
             "FLAG{simulated_ctf_flag}".to_string());
+        files.insert("/home/user/.secret_data".to_string(),
+            "Acceso autorizado. FLAG{basic_linux_commands}".to_string());
 
         // Apache access log (simulated)
         files.insert("/var/log/access.log".to_string(),

@@ -45,6 +45,11 @@ impl VirtualNetwork {
             PortInfo { port: 443, service: "https".to_string(), state: "open".to_string() },
             PortInfo { port: 3000, service: "dev-server".to_string(), state: "open".to_string() },
         ]);
+        hosts.insert("10.0.2.15".to_string(), vec![
+            PortInfo { port: 22, service: "ssh".to_string(), state: "open".to_string() },
+            PortInfo { port: 80, service: "http".to_string(), state: "open".to_string() },
+            PortInfo { port: 1337, service: "ctf-challenge".to_string(), state: "open".to_string() },
+        ]);
 
         VirtualNetwork { hosts }
     }
