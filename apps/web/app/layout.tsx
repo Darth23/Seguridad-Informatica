@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "CyberEdu - Zero-Trust Academy",
   description: "Plataforma educativa de ciberseguridad",
   manifest: "/manifest.json",
-  themeColor: "#58a6ff",
+  themeColor: "#0a0f1d",
 };
 
 export default function RootLayout({
@@ -17,9 +17,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
-      <body>
-        {children}
+    <html lang="es" className="dark">
+      <body className="bg-[#0a0f1d] text-slate-100" style={{ margin: 0, padding: 0, width: '100vw', height: '100vh', overflow: 'hidden', background: '#0a0f1d', display: 'flex', flexDirection: 'row' }}>
+        <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'row', background: '#0a0f1d' }}>
+          {children}
+        </div>
         <OnboardingTour />
         <ToastContainer />
         <PWAInstallPrompt />

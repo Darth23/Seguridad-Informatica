@@ -76,7 +76,6 @@ export function BackupRestore() {
 
         // Restore UI state
         if (backup.ui) {
-          const store = useUIStore.getState();
           if (backup.ui.completedLessons) {
             useUIStore.setState({ completedLessons: backup.ui.completedLessons });
           }

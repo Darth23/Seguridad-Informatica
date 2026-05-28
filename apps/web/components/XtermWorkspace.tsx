@@ -298,26 +298,11 @@ export function XtermWorkspace({ onCommandExecute: _onCommandExecute, initialCom
 
   return (
     <XtermA11yWrapper isReady={isReady}>
-      <div className="h-full flex flex-col bg-[#0d1117]">
-        {/* Terminal Header */}
-        <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-gray-700">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-            <span className="ml-2 text-xs text-gray-400 font-mono">bash — user@cyberedu</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-xs ${isFocused ? 'text-green-400' : 'text-gray-500'}`}>
-              {isFocused ? '● Activo' : '○ Inactivo'}
-            </span>
-          </div>
-        </div>
-
+      <div className="h-full flex flex-col bg-[#050814]">
         {/* Terminal Body */}
         <div
           ref={terminalRef}
-          className="flex-1 overflow-hidden p-2"
+          className="flex-1 min-h-0 overflow-hidden"
           role="application"
           aria-label="Terminal interactiva"
           aria-live="polite"
@@ -342,9 +327,9 @@ export function XtermWorkspace({ onCommandExecute: _onCommandExecute, initialCom
         </div>
 
         {/* Status Bar */}
-        <div className="px-4 py-1 bg-[#161b22] border-t border-gray-700 text-xs text-gray-500 flex justify-between">
+        <div className="px-4 py-1 bg-[#0d1117] border-t border-slate-800 text-xs text-slate-500 flex justify-between flex-shrink-0">
           <span>Ctrl+L: Limpiar | Ctrl+C: Cancelar | ↑/↓: Historial</span>
-          <span>{terminalHistory.length} comandos en sesión</span>
+          <span>{terminalHistory.length} comandos</span>
         </div>
       </div>
     </XtermA11yWrapper>
