@@ -6,7 +6,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 import { useUIStore, useTerminalStore } from '@/lib/stores/uiStore';
 import { XtermA11yWrapper } from './XtermA11yWrapper';
-import { processCommand } from '@/lib/wasm';
+import { processCommand, loadWasmModule } from '@/lib/wasm';
 import type { CommandResponse } from '@/lib/wasm/types';
 
 interface XtermWorkspaceProps {
@@ -76,6 +76,16 @@ export function XtermWorkspace({ initialCommands = [] }: XtermWorkspaceProps) {
   const stableInitialCommands = useMemo(() => initialCommands, []);
   const { addTerminalLine } = useUIStore();
   const { isReady, setIsReady, addCommand } = useTerminalStore();
+  const activeLesson = useUIStore((s) => s.activeLesson);
+
+  // Auto-enter reverse shell when Module 0.6 is selected
+  useEffect(() => {
+    if (activeLesson === '0.6' && isReady) {
+      loadWasmModule().then((wasm) => {
+        wasm.process_command('enter_reverse_shell', '');
+      }).catch(() => {});
+    }
+  }, [activeLesson, isReady]);
 
   const writePrompt = useCallback(async (term: Terminal) => {
     const prompt = await getPrompt();

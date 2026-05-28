@@ -63,6 +63,64 @@ pub fn process_command(command: &str, args: &str) -> String {
 
 /// Execute a command and return structured response
 fn execute_command(command: &str, args: &str) -> CommandResponse {
+    // ── Shell-context commands (active inside reverse shell) ──
+    if shell_state::in_reverse_shell() {
+        match command {
+            "whoami" => {
+                return CommandResponse::success(shell_state::handle_whoami());
+            }
+            "id" => {
+                if shell_state::is_root() {
+                    return CommandResponse::success("uid=0(root) gid=0(root) groups=0(root)".to_string());
+                }
+                return CommandResponse::success("uid=1000(victim) gid=1000(victim) groups=1000(victim),27(sudo)".to_string());
+            }
+            "uname" => {
+                return CommandResponse::success(
+                    "Linux target-server 4.4.0-116-generic #140-Ubuntu SMP Mon Feb 12 21:23:04 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux".to_string()
+                );
+            }
+            "sudo" => {
+                let full = if args.is_empty() { String::new() } else { format!("{} {}", command, args) };
+                // Check for sudo find exploit first
+                if let Some(msg) = shell_state::check_sudo_find_exploit(&full) {
+                    return CommandResponse::success(msg);
+                }
+                if args == "-l" || args.starts_with("-l") {
+                    return CommandResponse::success(shell_state::handle_sudo_l());
+                }
+                return CommandResponse::error("sudo: a password is required or command not allowed".to_string());
+            }
+            "cat" => {
+                if args == "/root/proof.txt" {
+                    return CommandResponse::success(shell_state::read_root_proof());
+                }
+                if args == "flag.txt" {
+                    return CommandResponse::success(shell_state::read_flag_file());
+                }
+                // For other files, fall through to filesystem
+            }
+            "ls" => {
+                if shell_state::is_root() {
+                    return CommandResponse::success("proof.txt  .bash_history  .ssh".to_string());
+                }
+                return CommandResponse::success("Desktop  Documents  Downloads  flag.txt  .bashrc".to_string());
+            }
+            "pwd" => {
+                if shell_state::is_root() {
+                    return CommandResponse::success("/root".to_string());
+                }
+                return CommandResponse::success("/home/victim".to_string());
+            }
+            "exit" => {
+                return CommandResponse::success(shell_state::exit_shell());
+            }
+            // No catch-all here — unknown commands fall through to global match
+            _ => {}
+        }
+    }
+
+    // ── Global commands (available in any context) ──
     match command {
         // Network commands
         "nmap" => network::scan_host_impl(args),
@@ -75,6 +133,10 @@ fn execute_command(command: &str, args: &str) -> CommandResponse {
         "exploit_service" => shell_state::exploit_service_impl(args),
         "shell_status" => shell_state::get_shell_status_impl(),
         "shell_reset" => shell_state::reset_shell_impl(),
+        "enter_reverse_shell" => {
+            shell_state::enter_reverse_shell_for_m06();
+            CommandResponse::success("Reverse shell activated for Module 0.6.".to_string())
+        }
         
         // Crypto commands
         "hash" => crypto::hash_data_impl(args),

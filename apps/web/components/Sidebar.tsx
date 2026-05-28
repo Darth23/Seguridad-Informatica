@@ -14,6 +14,7 @@ const LESSONS = [
   { id: '0.3', title: 'Modulo 0.3: Escaneo Sigiloso', icon: '🕵️', type: 'lesson' as const },
   { id: '0.4', title: 'Modulo 0.4: Banner Grabbing', icon: '🔍', type: 'lesson' as const },
   { id: '0.5', title: 'Modulo 0.5: Reverse Shells', icon: '💥', type: 'lesson' as const },
+  { id: '0.6', title: 'Modulo 0.6: PrivEsc', icon: '👑', type: 'lesson' as const },
 ];
 
 function AchievementsPreview() {
