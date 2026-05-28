@@ -1,8 +1,11 @@
 'use client';
 
+declare module '*.css';
+
 import React, { useState, useCallback, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
+// @ts-ignore: side-effect CSS import for syntax highlighting
 import 'highlight.js/styles/atom-one-dark.css';
 
 interface MarkdownReaderProps {

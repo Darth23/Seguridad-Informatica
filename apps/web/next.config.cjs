@@ -1,4 +1,7 @@
-import { withPWA } from '@ducanh2912/next-pwa/dist/cjs/index.js';
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -43,7 +46,7 @@ const nextConfig = {
   },
 };
 
-export default withPWA({
+module.exports = withPWA({
   dest: 'public',
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,

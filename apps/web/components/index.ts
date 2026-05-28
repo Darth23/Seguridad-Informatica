@@ -4,7 +4,7 @@
  */
 
 // Layout Components
-export { AppLayout } from './AppLayout';
+export { default as AppLayout } from './AppLayout';
 export { TerminalErrorBoundary } from './TerminalErrorBoundary';
 
 // Navigation & Sidebar
